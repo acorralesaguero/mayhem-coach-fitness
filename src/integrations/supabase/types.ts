@@ -14,7 +14,185 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      checkins: {
+        Row: {
+          available_minutes: number | null
+          checkin_date: string
+          created_at: string
+          day_outlook: string | null
+          energy: number
+          id: string
+          motivation: number
+          notes: string | null
+          sleep_hours: number
+          sleep_quality: number
+          soreness: number
+          stress: number
+          user_id: string
+        }
+        Insert: {
+          available_minutes?: number | null
+          checkin_date?: string
+          created_at?: string
+          day_outlook?: string | null
+          energy: number
+          id?: string
+          motivation: number
+          notes?: string | null
+          sleep_hours: number
+          sleep_quality: number
+          soreness: number
+          stress: number
+          user_id: string
+        }
+        Update: {
+          available_minutes?: number | null
+          checkin_date?: string
+          created_at?: string
+          day_outlook?: string | null
+          energy?: number
+          id?: string
+          motivation?: number
+          notes?: string | null
+          sleep_hours?: number
+          sleep_quality?: number
+          soreness?: number
+          stress?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          build_focus: string[]
+          created_at: string
+          current_body_type: string | null
+          default_duration: number
+          display_name: string | null
+          equipment: string[]
+          experience: string | null
+          id: string
+          limitations: string | null
+          onboarded: boolean
+          primary_goal: string | null
+          progression_style: string | null
+          target_physique: string | null
+          updated_at: string
+        }
+        Insert: {
+          build_focus?: string[]
+          created_at?: string
+          current_body_type?: string | null
+          default_duration?: number
+          display_name?: string | null
+          equipment?: string[]
+          experience?: string | null
+          id: string
+          limitations?: string | null
+          onboarded?: boolean
+          primary_goal?: string | null
+          progression_style?: string | null
+          target_physique?: string | null
+          updated_at?: string
+        }
+        Update: {
+          build_focus?: string[]
+          created_at?: string
+          current_body_type?: string | null
+          default_duration?: number
+          display_name?: string | null
+          equipment?: string[]
+          experience?: string | null
+          id?: string
+          limitations?: string | null
+          onboarded?: boolean
+          primary_goal?: string | null
+          progression_style?: string | null
+          target_physique?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      week_plan: {
+        Row: {
+          day_of_week: number
+          duration: number
+          id: string
+          is_training: boolean
+          muscle_groups: string[]
+          user_id: string
+        }
+        Insert: {
+          day_of_week: number
+          duration?: number
+          id?: string
+          is_training?: boolean
+          muscle_groups?: string[]
+          user_id: string
+        }
+        Update: {
+          day_of_week?: number
+          duration?: number
+          id?: string
+          is_training?: boolean
+          muscle_groups?: string[]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      workouts: {
+        Row: {
+          checkin_id: string | null
+          completed: boolean
+          created_at: string
+          duration: number
+          feedback: string | null
+          id: string
+          muscle_groups: string[]
+          plan: Json
+          rpe: number | null
+          title: string
+          user_id: string
+          workout_date: string
+        }
+        Insert: {
+          checkin_id?: string | null
+          completed?: boolean
+          created_at?: string
+          duration: number
+          feedback?: string | null
+          id?: string
+          muscle_groups?: string[]
+          plan: Json
+          rpe?: number | null
+          title: string
+          user_id: string
+          workout_date?: string
+        }
+        Update: {
+          checkin_id?: string | null
+          completed?: boolean
+          created_at?: string
+          duration?: number
+          feedback?: string | null
+          id?: string
+          muscle_groups?: string[]
+          plan?: Json
+          rpe?: number | null
+          title?: string
+          user_id?: string
+          workout_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workouts_checkin_id_fkey"
+            columns: ["checkin_id"]
+            isOneToOne: false
+            referencedRelation: "checkins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
