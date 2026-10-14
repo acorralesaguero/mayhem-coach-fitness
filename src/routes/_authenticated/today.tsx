@@ -148,7 +148,7 @@ function WorkoutView({ w, onChange }: { w: Workout; onChange: () => void }) {
 
   async function complete() {
     const { error } = await supabase.from("workouts").update({ completed: true, rpe, feedback }).eq("id", w.id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Logged. Great work.");
     onChange();
   }

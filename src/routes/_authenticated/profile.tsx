@@ -43,7 +43,7 @@ function ProfilePage() {
 
   async function save() {
     const { error } = await supabase.from("profiles").upsert({ id: user!.id, ...p!, onboarded: true });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Profile saved");
     if (!onboarded) navigate({ to: "/week" });
   }
