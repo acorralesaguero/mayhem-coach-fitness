@@ -14,12 +14,12 @@ const MODES: { key: TimerMode; label: string }[] = [
 ];
 
 export const Route = createFileRoute("/_authenticated/timer")({
-  validateSearch: (s: Record<string, unknown>): Partial<TimerConfig> => ({
-    mode: MODES.some((m) => m.key === s.mode) ? (s.mode as TimerMode) : undefined,
-    work: s.work != null ? Number(s.work) : undefined,
-    rest: s.rest != null ? Number(s.rest) : undefined,
-    rounds: s.rounds != null ? Number(s.rounds) : undefined,
-    cap: s.cap != null ? Number(s.cap) : undefined,
+  validateSearch: (s: Record<string, unknown>): { [K in keyof TimerConfig]?: TimerConfig[K] | undefined } => ({
+    mode: MODES.some((m) => m.key === s["mode"]) ? (s["mode"] as TimerMode) : undefined,
+    work: s["work"] != null ? Number(s["work"]) : undefined,
+    rest: s["rest"] != null ? Number(s["rest"]) : undefined,
+    rounds: s["rounds"] != null ? Number(s["rounds"]) : undefined,
+    cap: s["cap"] != null ? Number(s["cap"]) : undefined,
   }),
   head: () => ({ meta: [{ title: "Workout timer — Forge" }, { name: "description", content: "EMOM, AMRAP, Tabata, intervals and for-time clock." }] }),
   component: TimerPage,
