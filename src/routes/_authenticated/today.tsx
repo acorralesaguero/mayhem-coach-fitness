@@ -1,11 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Timer } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
-import { generateWorkout, type WorkoutPlan } from "@/lib/coach.functions";
+import { buildSession, type Tier, type WorkoutPlan } from "@/lib/program";
 import { guessTimer } from "@/lib/timer";
 import { Chips, Scale, Section } from "@/components/Chips";
 import { Button } from "@/components/ui/button";
@@ -87,15 +86,25 @@ function TodayPage() {
 function CheckIn({ duration, setDuration, groups, setGroups, restDay, onDone }: {
   duration: 30 | 60 | 90; setDuration: (d: 30 | 60 | 90) => void; groups: string[]; setGroups: (g: string[]) => void; restDay: boolean; onDone: () => void;
 }) {
-  const gen = useServerFn(generateWorkout);
   const [busy, setBusy] = useState(false);
+  const [tier, setTier] = useState<Tier>("rx");
   const [c, setC] = useState({ energy: 3, sleep_hours: 7, sleep_quality: 3, stress: 3, soreness: 2, motivation: 3, day_outlook: "", notes: "" });
   const set = (k: keyof typeof c) => (v: number | string) => setC({ ...c, [k]: v });
 
   async function submit() {
     setBusy(true);
     try {
-      await gen({ data: { checkin: c, duration, muscle_groups: groups } });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Please sign in again.");
+      const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+      const { data: ck, error: cErr } = await supabase.from("checkins")
+        .insert({ ...c, user_id: user.id, available_minutes: duration }).select().single();
+      if (cErr) throw cErr;
+      const plan = buildSession({ date: new Date(), duration, groups, benchmarks: prof ?? {}, readiness: c, tier });
+      const { error } = await supabase.from("workouts").insert({
+        user_id: user.id, checkin_id: ck.id, workout_date: todayStr(), duration, muscle_groups: groups, title: plan.title, plan: plan as never,
+      });
+      if (error) throw error;
       onDone();
     } catch (e) {
       toast.error((e as Error).message || "Something went wrong");
@@ -129,13 +138,18 @@ function CheckIn({ duration, setDuration, groups, setGroups, restDay, onDone }: 
         <div className="space-y-4">
           <Chips options={DURATIONS} value={duration} onChange={setDuration} />
           <Chips multi options={MUSCLE_GROUPS} value={groups} onChange={setGroups} />
+          <div className="flex gap-2">
+            {(["rx", "scaled"] as const).map((t) => (
+              <button key={t} type="button" className="chip" data-active={tier === t} onClick={() => setTier(t)}>{t === "rx" ? "Rx" : "Scaled"}</button>
+            ))}
+          </div>
         </div>
       </Section>
       <Section title="Anything else?">
         <Textarea value={c.notes} onChange={(e) => set("notes")(e.target.value)} placeholder="Niggles, nutrition, mood…" />
       </Section>
       <Button variant="clay" size="xl" className="w-full" disabled={busy} onClick={submit}>
-        {busy ? "Your coach is programming…" : `Build my ${duration}-minute session`}
+        {busy ? "Loading today’s workout…" : `Get today’s ${duration}-minute workout`}
       </Button>
     </div>
   );

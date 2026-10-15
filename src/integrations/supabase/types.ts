@@ -64,51 +64,84 @@ export type Database = {
       }
       profiles: {
         Row: {
+          back_squat: number | null
+          bodyweight: number | null
           build_focus: string[]
+          clean_jerk: number | null
           created_at: string
           current_body_type: string | null
+          deadlift: number | null
           default_duration: number
           display_name: string | null
           equipment: string[]
           experience: string | null
+          front_squat: number | null
           id: string
           limitations: string | null
+          max_pullups: number | null
+          max_pushups: number | null
           onboarded: boolean
           primary_goal: string | null
           progression_style: string | null
+          push_press: number | null
+          snatch: number | null
+          strict_press: number | null
           target_physique: string | null
+          units: string
           updated_at: string
         }
         Insert: {
+          back_squat?: number | null
+          bodyweight?: number | null
           build_focus?: string[]
+          clean_jerk?: number | null
           created_at?: string
           current_body_type?: string | null
+          deadlift?: number | null
           default_duration?: number
           display_name?: string | null
           equipment?: string[]
           experience?: string | null
+          front_squat?: number | null
           id: string
           limitations?: string | null
+          max_pullups?: number | null
+          max_pushups?: number | null
           onboarded?: boolean
           primary_goal?: string | null
           progression_style?: string | null
+          push_press?: number | null
+          snatch?: number | null
+          strict_press?: number | null
           target_physique?: string | null
+          units?: string
           updated_at?: string
         }
         Update: {
+          back_squat?: number | null
+          bodyweight?: number | null
           build_focus?: string[]
+          clean_jerk?: number | null
           created_at?: string
           current_body_type?: string | null
+          deadlift?: number | null
           default_duration?: number
           display_name?: string | null
           equipment?: string[]
           experience?: string | null
+          front_squat?: number | null
           id?: string
           limitations?: string | null
+          max_pullups?: number | null
+          max_pushups?: number | null
           onboarded?: boolean
           primary_goal?: string | null
           progression_style?: string | null
+          push_press?: number | null
+          snatch?: number | null
+          strict_press?: number | null
           target_physique?: string | null
+          units?: string
           updated_at?: string
         }
         Relationships: []

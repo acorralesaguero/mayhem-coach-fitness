@@ -8,6 +8,13 @@
       "when": 1792022036325,
       "tag": "0000_coach_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792024084444,
+      "tag": "0001_benchmarks",
+      "breakpoints": true
     }
   ]
 }
