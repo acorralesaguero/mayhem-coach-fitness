@@ -20,6 +20,6 @@ describe("program", () => {
   it("computes squat load from 1RM (Q2 strength 75%)", () => {
     // May 12 2026 → Q2, week index 18 → wave 0.1 (peak) → 85% of 300 = 255
     const p = buildSession({ date: new Date(2026, 4, 12), duration: 60, groups: ["Legs"], benchmarks: { back_squat: 300 }, readiness: fresh, tier: "rx" });
-    expect(p.blocks[1].exercises[0].prescription).toBe("5 x 5 @ 255 lb");
+    expect(p.blocks[1]?.exercises[0]?.prescription).toBe("5 x 5 @ 255 lb");
   });
 });

@@ -49,7 +49,7 @@ function ProfilePage() {
   const set = <K extends keyof P>(k: K) => (v: P[K]) => setP({ ...p, [k]: v });
 
   async function save() {
-    const { error } = await supabase.from("profiles").upsert({ id: user!.id, ...(p as never), onboarded: true });
+    const { error } = await supabase.from("profiles").upsert({ id: user!.id, ...(p as object), onboarded: true });
     if (error) { toast.error(error.message); return; }
     toast.success("Profile saved");
     if (!onboarded) navigate({ to: "/week" });

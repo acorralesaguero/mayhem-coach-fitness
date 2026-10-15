@@ -198,7 +198,7 @@ export function buildSession(opts: { date: Date; duration: 30 | 60 | 90; groups:
     ? `Readiness is down today, so loads are trimmed ${Math.round((1 - factor) * 100)}%. Same session as everyone else — just smarter weights.`
     : "You're ready. Hit the prescribed loads and own the metcon.";
   return {
-    title: `${focus[0].toUpperCase()}${focus.slice(1)} · ${met.name}`,
+    title: `${focus[0]!.toUpperCase()}${focus.slice(1)} · ${met.name}`,
     coach_note: `${phase.name} phase, ${waveLabel}. ${note}`,
     intensity, blocks, cooldown: "5 min easy spin + stretch the muscles you trained.",
   };
