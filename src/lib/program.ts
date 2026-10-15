@@ -130,7 +130,7 @@ export function focusFor(groups: string[], dow: number): Focus {
   if (/legs|glutes/.test(g)) return "lower";
   if (/chest|back|shoulders|arms|gymnastics/.test(g)) return "upper";
   if (/full/.test(g)) return "full";
-  return (["recovery", "lower", "upper", "engine", "oly", "full", "full"] as Focus[])[dow];
+  return (["recovery", "lower", "upper", "engine", "oly", "full", "full"] as Focus[])[dow]!;
 }
 
 function loadFor(ex: Ex, b: Benchmarks, units: Units, factor: number, tier: Tier, pctBoost = 0): string {
@@ -147,8 +147,8 @@ export function buildSession(opts: { date: Date; duration: 30 | 60 | 90; groups:
   const { date, duration, benchmarks: b, readiness, tier } = opts;
   const units: Units = b.units === "kg" ? "kg" : "lb";
   const wk = weekIndex(date);
-  const phase = PHASES[Math.floor(date.getMonth() / 3)];
-  const wave = WAVE[((wk % 4) + 4) % 4];
+  const phase = PHASES[Math.floor(date.getMonth() / 3)]!;
+  const wave = WAVE[((wk % 4) + 4) % 4]!;
   const factor = readinessFactor(readiness);
   let focus = focusFor(opts.groups, date.getDay());
   if (factor <= 0.85 && focus !== "recovery") focus = "engine";
@@ -171,7 +171,7 @@ export function buildSession(opts: { date: Date; duration: 30 | 60 | 90; groups:
   }
 
   const metcons = METCONS[focus];
-  const met = metcons[((wk % metcons.length) + metcons.length) % metcons.length];
+  const met = metcons[((wk % metcons.length) + metcons.length) % metcons.length]!;
   const blocks: WorkoutPlan["blocks"] = [{ name: "Warm-up", format: "2 rounds easy", minutes: warmMin, exercises: WARMUP.map(rx) }];
 
   const metEx = met.ex.map((e) => ({ name: e.name, prescription: loadFor(e, b, units, factor, tier), rest: e.rest ?? "", cue: e.cue }));
