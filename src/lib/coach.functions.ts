@@ -27,7 +27,7 @@ export const adjustWorkout = createServerFn({ method: "POST" })
     const { data: w, error } = await supabase.from("workouts").select("plan").eq("id", data.workoutId).single();
     if (error || !w) throw new Error("Workout not found");
     const plan = w.plan as unknown as WorkoutPlan;
-    const key = process.env.LOVABLE_API_KEY;
+    const key = process.env["LOVABLE_API_KEY"];
     if (!key) throw new Error("Coach unavailable");
 
     const openai = createOpenAI({ baseURL: "https://ai.gateway.lovable.dev/v1", apiKey: key, headers: { "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "vercel-ai-sdk" } });

@@ -16,7 +16,7 @@ const MODES: { key: TimerMode; label: string }[] = [
 ];
 
 export const Route = createFileRoute("/_authenticated/timer")({
-  validateSearch: (s: Record<string, unknown>): { [K in keyof TimerConfig]?: TimerConfig[K] | undefined } & { w?: string; b?: number } => ({
+  validateSearch: (s: Record<string, unknown>): { [K in keyof TimerConfig]?: TimerConfig[K] | undefined } & { w?: string | undefined; b?: number | undefined } => ({
     w: typeof s["w"] === "string" ? (s["w"] as string) : undefined,
     b: s["b"] != null ? Number(s["b"]) : undefined,
     mode: MODES.some((m) => m.key === s["mode"]) ? (s["mode"] as TimerMode) : undefined,
