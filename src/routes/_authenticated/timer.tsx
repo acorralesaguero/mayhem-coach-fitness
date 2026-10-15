@@ -4,6 +4,8 @@ import { Pause, Play, RotateCcw } from "lucide-react";
 import { computeState, PRESETS, totalDuration, type TimerConfig, type TimerMode } from "@/lib/timer";
 import { Button } from "@/components/ui/button";
 import { Chips } from "@/components/Chips";
+import { supabase } from "@/integrations/supabase/client";
+import type { WorkoutPlan } from "@/lib/program";
 
 const MODES: { key: TimerMode; label: string }[] = [
   { key: "fortime", label: "For time" },
@@ -14,7 +16,9 @@ const MODES: { key: TimerMode; label: string }[] = [
 ];
 
 export const Route = createFileRoute("/_authenticated/timer")({
-  validateSearch: (s: Record<string, unknown>): { [K in keyof TimerConfig]?: TimerConfig[K] | undefined } => ({
+  validateSearch: (s: Record<string, unknown>): { [K in keyof TimerConfig]?: TimerConfig[K] | undefined } & { w?: string; b?: number } => ({
+    w: typeof s["w"] === "string" ? (s["w"] as string) : undefined,
+    b: s["b"] != null ? Number(s["b"]) : undefined,
     mode: MODES.some((m) => m.key === s["mode"]) ? (s["mode"] as TimerMode) : undefined,
     work: s["work"] != null ? Number(s["work"]) : undefined,
     rest: s["rest"] != null ? Number(s["rest"]) : undefined,
@@ -39,7 +43,13 @@ function beep(freq = 880, dur = 0.15) {
 
 function TimerPage() {
   const search = Route.useSearch();
-  const initial: TimerConfig = { ...PRESETS[search.mode ?? "emom"], ...Object.fromEntries(Object.entries(search).filter(([, v]) => v != null && !Number.isNaN(v))) } as TimerConfig;
+  const { w: wid, b: bidx, ...cfgSearch } = search;
+  const initial: TimerConfig = { ...PRESETS[search.mode ?? "emom"], ...Object.fromEntries(Object.entries(cfgSearch).filter(([, v]) => v != null && !Number.isNaN(v))) } as TimerConfig;
+  const [block, setBlock] = useState<WorkoutPlan["blocks"][number] | null>(null);
+  useEffect(() => {
+    if (!wid || bidx == null) return;
+    supabase.from("workouts").select("plan").eq("id", wid).maybeSingle().then(({ data }) => setBlock((data?.plan as unknown as WorkoutPlan | undefined)?.blocks[bidx] ?? null));
+  }, [wid, bidx]);
   const [cfg, setCfg] = useState<TimerConfig>(initial);
   const [elapsed, setElapsed] = useState(0);
   const [running, setRunning] = useState(false);
@@ -77,6 +87,8 @@ function TimerPage() {
   const progress = total ? Math.min(1, st.totalElapsed / total) : 0;
   const isRest = st.phase === "rest";
   const editable = !running && elapsed === 0 && countdown == null;
+  const stopped = st.phase === "done" || (!running && countdown == null && elapsed > 0);
+  const signal = stopped ? "!bg-stop text-ink-foreground" : isRest || countdown != null ? "!bg-rest text-signal-foreground" : running ? "!bg-go text-signal-foreground" : "!bg-ink text-ink-foreground";
   const big = cfg.mode === "fortime" ? fmt(st.totalElapsed) : fmt(st.remaining);
 
   return (
@@ -87,10 +99,10 @@ function TimerPage() {
           onChange={(l: string) => pick(MODES.find((m) => m.label === l)!.key)} />
       </div>
 
-      <div className={`surface relative overflow-hidden p-8 text-center transition-colors ${isRest ? "!bg-olive text-ink-foreground" : st.phase === "done" ? "!bg-clay text-accent-foreground" : "!bg-ink text-ink-foreground"}`}>
+      <div className={`surface relative overflow-hidden p-8 text-center transition-colors ${signal}`}>
         <div className="absolute inset-x-0 bottom-0 h-1 bg-sand/70" style={{ width: `${progress * 100}%` }} />
-        <p className="eyebrow !text-sand">
-          {countdown != null ? "Get ready" : st.phase === "done" ? "Time" : isRest ? "Rest" : cfg.mode === "fortime" ? `Cap ${fmt(cfg.cap)}` : cfg.mode === "amrap" ? "AMRAP" : "Work"}
+        <p className="eyebrow !text-current opacity-80">
+          {countdown != null ? "Get ready" : st.phase === "done" ? "Stop · Time" : stopped ? "Paused" : running && !isRest ? "Go" : isRest ? "Rest" : cfg.mode === "fortime" ? `Cap ${fmt(cfg.cap)}` : cfg.mode === "amrap" ? "AMRAP" : "Work"}
         </p>
         <div className="mt-2 font-display text-[6.5rem] leading-none tabular-nums">{countdown ?? big}</div>
         {(cfg.mode === "emom" || cfg.mode === "tabata" || cfg.mode === "intervals") && (
@@ -109,6 +121,21 @@ function TimerPage() {
         )}
         <Button variant="outline" size="xl" className="rounded-full" onClick={reset} aria-label="Reset"><RotateCcw /></Button>
       </div>
+
+      {block && (
+        <section className="surface p-5">
+          <p className="eyebrow">{block.minutes} min · {block.format}</p>
+          <h2 className="mt-1 text-2xl">{block.name}</h2>
+          <ul className="mt-3 divide-y">
+            {block.exercises.map((e, j) => (
+              <li key={j} className="flex items-baseline justify-between gap-3 py-2">
+                <span className="min-w-0 font-medium">{e.name}</span>
+                <span className="shrink-0 text-sm text-clay">{e.prescription}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {editable && (
         <section className="surface space-y-4 p-5">
