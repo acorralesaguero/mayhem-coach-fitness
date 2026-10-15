@@ -149,7 +149,7 @@ function CheckIn({ duration, setDuration, groups, setGroups, restDay, onDone }: 
         <Textarea value={c.notes} onChange={(e) => set("notes")(e.target.value)} placeholder="Niggles, nutrition, mood…" />
       </Section>
       <Button variant="clay" size="xl" className="w-full" disabled={busy} onClick={submit}>
-        {busy ? "Your coach is programming…" : `Build my ${duration}-minute session`}
+        {busy ? "Loading today’s workout…" : `Get today’s ${duration}-minute workout`}
       </Button>
     </div>
   );
