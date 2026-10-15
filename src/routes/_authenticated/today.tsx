@@ -1,7 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Timer } from "lucide-react";
+import { Repeat2, Send, Timer } from "lucide-react";
+import { swapOptions } from "@/lib/swaps";
+import { adjustWorkout } from "@/lib/coach.functions";
+import { useServerFn } from "@tanstack/react-start";
+import type { PlanExercise } from "@/lib/program";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { buildSession, type Tier, type WorkoutPlan } from "@/lib/program";
@@ -159,6 +163,25 @@ function WorkoutView({ w, onChange }: { w: Workout; onChange: () => void }) {
   const [rpe, setRpe] = useState<number>(w.rpe ?? 7);
   const [feedback, setFeedback] = useState("");
   const p = w.plan;
+  const adjust = useServerFn(adjustWorkout);
+  const [note, setNote] = useState("");
+  const [adjusting, setAdjusting] = useState(false);
+  const [openSwap, setOpenSwap] = useState<string | null>(null);
+
+  async function savePlan(next: typeof p) {
+    const { error } = await supabase.from("workouts").update({ plan: next as never }).eq("id", w.id);
+    if (error) toast.error(error.message); else onChange();
+  }
+  function patchEx(bi: number, ei: number, patch: Partial<PlanExercise>) {
+    return { ...p, blocks: p.blocks.map((b, i) => i !== bi ? b : { ...b, exercises: b.exercises.map((e, j) => j !== ei ? e : { ...e, ...patch }) }) };
+  }
+  async function askCoach() {
+    if (note.trim().length < 2) return;
+    setAdjusting(true);
+    try { await adjust({ data: { workoutId: w.id, message: note.trim() } }); setNote(""); toast.success("Session adjusted"); onChange(); }
+    catch (e) { toast.error((e as Error).message); }
+    finally { setAdjusting(false); }
+  }
 
   async function complete() {
     const { error } = await supabase.from("workouts").update({ completed: true, rpe, feedback }).eq("id", w.id);
@@ -181,6 +204,17 @@ function WorkoutView({ w, onChange }: { w: Workout; onChange: () => void }) {
       <blockquote className="surface border-l-4 !border-l-clay p-5 font-display text-xl italic leading-snug">
         {p.coach_note}
       </blockquote>
+      {!w.completed && (
+        <section className="surface p-4">
+          <p className="eyebrow">Ask your coach to adjust</p>
+          <div className="mt-2 flex gap-2">
+            <Input value={note} onChange={(e) => setNote(e.target.value)} disabled={adjusting} className="h-11"
+              placeholder="No barbell, rower is taken, sore shoulder…" onKeyDown={(e) => e.key === "Enter" && askCoach()} />
+            <Button variant="ink" size="icon" className="h-11 w-11 shrink-0 rounded-full" disabled={adjusting || note.trim().length < 2} onClick={askCoach} aria-label="Send to coach"><Send /></Button>
+          </div>
+          {adjusting && <p className="mt-2 text-xs text-muted-foreground">Coach is reworking your session…</p>}
+        </section>
+      )}
       {p.blocks.map((b, i) => {
         const t = guessTimer(b.format, b.minutes);
         return (
@@ -191,19 +225,41 @@ function WorkoutView({ w, onChange }: { w: Workout; onChange: () => void }) {
                 <h2 className="mt-1 text-2xl">{b.name}</h2>
               </div>
               <Button asChild variant="outline" size="sm" className="rounded-full">
-                <Link to="/timer" search={t}><Timer /> Timer</Link>
+                <Link to="/timer" search={{ ...t, w: w.id, b: i }}><Timer /> Timer</Link>
               </Button>
             </div>
             <ul className="mt-4 divide-y">
-              {b.exercises.map((e, j) => (
+              {b.exercises.map((e, j) => {
+                const k = `${i}-${j}`;
+                return (
                 <li key={j} className="py-3">
                   <div className="flex items-baseline justify-between gap-3">
-                    <span className="font-medium">{e.name}</span>
+                    <span className="min-w-0 font-medium">{e.name}</span>
                     <span className="shrink-0 text-sm text-clay">{e.prescription}</span>
                   </div>
-                  <p className="mt-1 text-xs text-muted-foreground">{e.cue}{e.rest ? ` · Rest ${e.rest}` : ""}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{e.swapped_from ? `Swapped from ${e.swapped_from} · ` : ""}{e.cue}{e.rest ? ` · Rest ${e.rest}` : ""}</p>
+                  {!w.completed && (
+                    <div className="mt-2 grid grid-cols-[1fr_1fr_auto] gap-2">
+                      <Input aria-label={`${e.name} weight used`} defaultValue={e.actual?.weight ?? ""} placeholder="Weight used" className="h-9 text-sm"
+                        onBlur={(ev) => ev.target.value !== (e.actual?.weight ?? "") && savePlan(patchEx(i, j, { actual: { ...e.actual, weight: ev.target.value } }))} />
+                      <Input aria-label={`${e.name} reps done`} defaultValue={e.actual?.reps ?? ""} placeholder="Reps done" className="h-9 text-sm"
+                        onBlur={(ev) => ev.target.value !== (e.actual?.reps ?? "") && savePlan(patchEx(i, j, { actual: { ...e.actual, reps: ev.target.value } }))} />
+                      <Button variant="outline" size="sm" className="h-9 rounded-full" onClick={() => setOpenSwap(openSwap === k ? null : k)} aria-label={`Swap ${e.name}`}><Repeat2 /></Button>
+                    </div>
+                  )}
+                  {w.completed && (e.actual?.weight || e.actual?.reps) && (
+                    <p className="mt-1 text-xs">Logged: {[e.actual?.weight, e.actual?.reps && `${e.actual.reps} reps`].filter(Boolean).join(" · ")}</p>
+                  )}
+                  {openSwap === k && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {swapOptions(e.name).map((o) => (
+                        <button key={o} type="button" className="chip text-xs" onClick={() => { setOpenSwap(null); savePlan(patchEx(i, j, { name: o, swapped_from: e.swapped_from ?? e.name })); }}>{o}</button>
+                      ))}
+                    </div>
+                  )}
                 </li>
-              ))}
+                );
+              })}
             </ul>
           </section>
         );
@@ -218,7 +274,7 @@ function WorkoutView({ w, onChange }: { w: Workout; onChange: () => void }) {
               <div className="flex justify-between text-sm"><span>Effort (RPE)</span><span className="font-display text-2xl">{rpe}</span></div>
               <input type="range" min={1} max={10} value={rpe} onChange={(e) => setRpe(Number(e.target.value))} className="w-full accent-[var(--clay)]" />
             </div>
-            <Textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="How did it feel? Weights used?" />
+            <Textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="How did it feel?" />
             <Button variant="ink" size="xl" className="w-full" onClick={complete}>Mark complete</Button>
             <button className="w-full text-xs text-muted-foreground" onClick={redo}>Redo check-in & regenerate</button>
           </div>

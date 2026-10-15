@@ -5,11 +5,12 @@ export type Benchmarks = Partial<Record<Lift, number | null>> & { units?: string
 export type Readiness = { energy: number; sleep_hours: number; sleep_quality: number; stress: number; soreness: number; motivation: number };
 export type Tier = "rx" | "scaled";
 
+export type PlanExercise = { name: string; prescription: string; rest: string; cue: string; actual?: { weight?: string; reps?: string }; swapped_from?: string };
 export type WorkoutPlan = {
   title: string;
   coach_note: string;
   intensity: "recovery" | "moderate" | "hard" | "max";
-  blocks: { name: string; format: string; minutes: number; exercises: { name: string; prescription: string; rest: string; cue: string }[] }[];
+  blocks: { name: string; format: string; minutes: number; exercises: PlanExercise[] }[];
   cooldown: string;
 };
 

@@ -35,6 +35,10 @@
   --color-olive: var(--olive);
   --color-sand: var(--sand);
   --color-ink: var(--ink);
+  --color-go: var(--go);
+  --color-rest: var(--rest);
+  --color-stop: var(--stop);
+  --color-signal-foreground: var(--signal-foreground);
   --color-ink-foreground: var(--ink-foreground);
   --color-chart-1: var(--clay);
   --color-chart-2: var(--olive);
@@ -69,6 +73,10 @@
   --sand: oklch(0.8 0.05 80);
   --ink: oklch(0.2 0.006 60);
   --ink-foreground: oklch(0.94 0.01 75);
+  --go: oklch(0.62 0.17 150);
+  --rest: oklch(0.82 0.16 85);
+  --stop: oklch(0.56 0.21 27);
+  --signal-foreground: oklch(0.16 0.01 60);
 }
 
 @layer base {
