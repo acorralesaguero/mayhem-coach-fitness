@@ -5,7 +5,7 @@ import { jsonSchema, Output, streamText } from "ai";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { WorkoutPlan } from "@/lib/program";
 
-const exSchema = {
+const exSchema: import("ai").JSONSchema7 = {
   type: "object", additionalProperties: false,
   required: ["name", "prescription", "rest", "cue", "swapped_from"],
   properties: { name: { type: "string" }, prescription: { type: "string" }, rest: { type: "string" }, cue: { type: "string" }, swapped_from: { type: ["string", "null"] } },
