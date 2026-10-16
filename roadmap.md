@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Gender-neutral start screen and block-style Forge logo with matching app icon
+- [x] Gender-neutral start screen and block-style Forge logo with matching app icon
 - [x] Sign-in, profile/goals setup
 - [x] Weekly planner (training days + muscle groups)
 - [x] Daily coach check-in + AI workout (30/60/90)
