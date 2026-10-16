@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 # Agent rules
+- Start-screen branding uses an imported transparent logo asset and an icon derived from its symbol, keeping app identity consistent.
 - Signed-in pages live under src/routes/_authenticated (client-only guard, bottom nav) — sessions live in browser storage.
 - Workouts are fixed programming in src/lib/program.ts (pure, tested in src/test/program.test.ts); loads come from profile 1RMs × phase/wave × check-in readiness — keeps sessions consistent and verifiable.
 - Timer math is pure in src/lib/timer.ts with tests in src/test/timer.test.ts — keeps EMOM/Tabata logic verifiable.
