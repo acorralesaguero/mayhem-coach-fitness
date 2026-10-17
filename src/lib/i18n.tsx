@@ -9,6 +9,8 @@ export function translate<T>(value: T, language: Language): T {
   if (language !== "es" || typeof value !== "string") return value;
   const exact = spanish[value.trim()];
   if (exact) return value.replace(value.trim(), exact) as T;
+  const ready=value.match(/^(.+?) phase, (.+?)\. Readiness is down today, so loads are trimmed (\d+)%\. Same session as everyone else — just smarter weights\.$/);
+  if(ready)return `${translate(ready[1],language)}: ${translate(ready[2],language)}. Tu preparación es menor hoy, así que reducimos las cargas un ${ready[3]}%. La misma sesión, con cargas adaptadas a ti.` as T;
   let result = value;
   const keys = Object.keys(spanish).sort((a, b) => b.length - a.length);
   for (const key of keys) {
