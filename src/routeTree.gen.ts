@@ -12,6 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TryRouteImport } from './routes/try'
 import { Route as AuthenticatedInsightsRouteImport } from './routes/_authenticated/insights'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedTimerRouteImport } from './routes/_authenticated/timer'
@@ -30,6 +33,21 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TryRoute = TryRouteImport.update({
+  id: '/try',
+  path: '/try',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedInsightsRoute = AuthenticatedInsightsRouteImport.update({
@@ -61,6 +79,9 @@ const AuthenticatedWeekRoute = AuthenticatedWeekRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
+  '/try': typeof TryRoute
   '/insights': typeof AuthenticatedInsightsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/timer': typeof AuthenticatedTimerRoute
@@ -70,6 +91,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
+  '/try': typeof TryRoute
   '/insights': typeof AuthenticatedInsightsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/timer': typeof AuthenticatedTimerRoute
@@ -81,6 +105,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
+  '/try': typeof TryRoute
   '/_authenticated/insights': typeof AuthenticatedInsightsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/timer': typeof AuthenticatedTimerRoute
@@ -90,14 +117,36 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/insights' | '/profile' | '/timer' | '/today' | '/week'
+    | '/'
+    | '/auth'
+    | '/privacy'
+    | '/terms'
+    | '/try'
+    | '/insights'
+    | '/profile'
+    | '/timer'
+    | '/today'
+    | '/week'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/insights' | '/profile' | '/timer' | '/today' | '/week'
+  to:
+    | '/'
+    | '/auth'
+    | '/privacy'
+    | '/terms'
+    | '/try'
+    | '/insights'
+    | '/profile'
+    | '/timer'
+    | '/today'
+    | '/week'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/privacy'
+    | '/terms'
+    | '/try'
     | '/_authenticated/insights'
     | '/_authenticated/profile'
     | '/_authenticated/timer'
@@ -109,6 +158,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthRoute: typeof AuthRoute
+  PrivacyRoute: typeof PrivacyRoute
+  TermsRoute: typeof TermsRoute
+  TryRoute: typeof TryRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -132,6 +184,27 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/try': {
+      id: '/try'
+      path: '/try'
+      fullPath: '/try'
+      preLoaderRoute: typeof TryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/insights': {
@@ -196,6 +269,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthRoute: AuthRoute,
+  PrivacyRoute: PrivacyRoute,
+  TermsRoute: TermsRoute,
+  TryRoute: TryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
