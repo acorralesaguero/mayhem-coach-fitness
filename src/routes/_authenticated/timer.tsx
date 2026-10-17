@@ -67,7 +67,7 @@ function beep(freq = 880, dur = 0.15) {
 }
 
 function TimerPage() {
-  const { t, tError } = useTranslation();
+  const { t, tx, tError } = useTranslation();
   const search = Route.useSearch();
   const { w: wid, b: bidx, ...cfgSearch } = search;
   const initial: TimerConfig = {
@@ -213,7 +213,7 @@ function TimerPage() {
             : st.phase === "rest"
               ? "Rest"
               : running
-                ? `Work, round ${st.round} of ${cfg.rounds}`
+                ? tx("Work, round {round} of {rounds}", { round: st.round, rounds: cfg.rounds })
                 : "Stopped",
         )}
       </p>
@@ -249,7 +249,7 @@ function TimerPage() {
                     : isRest
                       ? "Rest"
                       : cfg.mode === "fortime"
-                        ? `Cap ${fmt(cfg.cap)}`
+                        ? tx("Cap {time}", { time: fmt(cfg.cap) })
                         : cfg.mode === "amrap"
                           ? "AMRAP"
                           : "Work",
@@ -456,7 +456,7 @@ function Stepper({
   max: number;
   step?: number;
 }) {
-  const { t, tError } = useTranslation();
+  const { t, tx } = useTranslation();
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
       <span className="text-sm">{t(label)}</span>
@@ -465,7 +465,7 @@ function Stepper({
           variant="outline"
           size="icon"
           className="h-11 w-11"
-          aria-label={t(`Decrease ${label}`)}
+          aria-label={tx("Decrease {setting}", { setting: t(label) })}
           onClick={() => onChange(Math.max(min, value - step))}
         >
           {t(" − ")}
@@ -475,7 +475,7 @@ function Stepper({
           variant="outline"
           size="icon"
           className="h-11 w-11"
-          aria-label={t(`Increase ${label}`)}
+          aria-label={tx("Increase {setting}", { setting: t(label) })}
           onClick={() => onChange(Math.min(max, value + step))}
         >
           {t(" + ")}

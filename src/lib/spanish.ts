@@ -623,4 +623,23 @@ Object.assign(spanish, {
     "Preparación, entrenamiento semanal y progreso de tus levantamientos.",
   "Same load all sets; leave 1–2 reps in the tank":
     "La misma carga en todas las series; deja 1–2 repeticiones en reserva",
+  "Morning, {name}.": "Buen día, {name}.",
+  "{count} training day": "{count} día de entrenamiento",
+  "{count} training days": "{count} días de entrenamiento",
+  "Train on {day}": "Entrenar el {day}",
+  "Work, round {round} of {rounds}": "Trabajo, ronda {round} de {rounds}",
+  "Cap {time}": "Límite {time}",
+  "Decrease {setting}": "Reducir {setting}",
+  "Increase {setting}": "Aumentar {setting}",
+  "{exercise} weight used": "Peso utilizado en {exercise}",
+  "{exercise} reps done": "Repeticiones realizadas de {exercise}",
+  "{block} finish time": "Tiempo final de {block}",
+  "Swap {exercise}": "Cambiar {exercise}",
+  "Get today's {minutes}-minute workout": "Ver la sesión de hoy de {minutes} minutos",
+  "{count} week streak": "{count} semana de constancia",
+  "{count} weeks streak": "{count} semanas de constancia",
+  "{phase} phase, {wave}. {note}": "Fase de {phase}, {wave}. {note}",
+  "{phase} phase. {note}": "Fase de {phase}. {note}",
+  "Readiness is down today, so loads are trimmed {percent}%. Same session as everyone else — just smarter weights.":
+    "Tu preparación es menor hoy, así que reducimos las cargas un {percent}%. La misma sesión, con cargas adaptadas a ti.",
 });

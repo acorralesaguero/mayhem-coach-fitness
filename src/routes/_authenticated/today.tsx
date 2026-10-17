@@ -43,7 +43,7 @@ export const Route = createFileRoute("/_authenticated/today")({
   component: TodayPage,
 });
 function TodayPage() {
-  const { t, tError, language, locale } = useTranslation();
+  const { t, tx, tError, language, locale } = useTranslation();
   const { data: profile, error: profileError } = useProfile(),
     { data: week } = useWeekPlan(),
     { data: workout, isPending } = useTodayWorkout(),
@@ -135,7 +135,7 @@ function TodayPage() {
           )}
         </p>
         <h1 className="mt-2 text-4xl">
-          {t(workout ? workout.title : `Morning, ${profile.display_name || "athlete"}.`)}
+          {workout ? t(workout.title) : tx("Morning, {name}.", { name: profile.display_name || t("athlete") })}
         </h1>
       </header>
       {t(
@@ -176,7 +176,7 @@ function CheckIn({
   recentTitles: string[];
   onDone: () => Promise<void>;
 }) {
-  const { t, tError, language, locale } = useTranslation();
+  const { t, tx, tError, language, locale } = useTranslation();
   const [duration, setDuration] = useState<30 | 60 | 90>(
       initialDuration === 30 ? 30 : initialDuration === 90 ? 90 : 60,
     ),
@@ -329,7 +329,7 @@ function CheckIn({
         disabled={busy || energy === null || soreness === null || sleep === null}
         onClick={submit}
       >
-        {busy ? t("Preparing your session…") : language === "es" ? `Ver la sesión de hoy de ${duration} minutos` : `Get today's ${duration}-minute workout`}
+        {busy ? t("Preparing your session…") : tx("Get today's {minutes}-minute workout", { minutes: duration })}
       </Button>
     </div>
   );
@@ -347,7 +347,7 @@ function WorkoutView({
   week: Database["public"]["Tables"]["week_plan"]["Row"][];
   onChange: () => Promise<void>;
 }) {
-  const { t, tError, language, locale } = useTranslation();
+  const { t, tx, tError, language, locale } = useTranslation();
   const initial = w.plan as unknown as WorkoutPlan;
   const [plan, setPlan] = useState(initial),
     [rpe, setRpe] = useState(w.rpe ?? 7),
@@ -404,11 +404,20 @@ function WorkoutView({
       break;
     }
   }
+  const streakLabel = tx(currentStreak === 1 ? "{count} week streak" : "{count} weeks streak", { count: currentStreak });
+  const phaseNote = plan.coach_note.match(/^(.+?) phase(?:, (.+?))?\. (.+)$/);
+  const coachNote = phaseNote
+    ? tx(phaseNote[2] ? "{phase} phase, {wave}. {note}" : "{phase} phase. {note}", {
+        phase: t(phaseNote[1] ?? ""),
+        wave: t(phaseNote[2] ?? ""),
+        note: t(phaseNote[3] ?? ""),
+      })
+    : t(plan.coach_note);
   const recap = [
     t(w.title),
     `${w.duration} min · RPE ${w.rpe ?? rpe}`,
     ...plan.blocks.filter((b) => b.result).map((b) => `${t(b.name)}: ${t(b.result)}`),
-    `${currentStreak} ${t("week streak")}`,
+    streakLabel,
     `${t("Next:")} ${t(next)}`,
   ].join("\n");
   return (
@@ -419,7 +428,7 @@ function WorkoutView({
         {t(plan.intensity)}
       </p>
       <blockquote className="my-5 border-l-4 border-clay pl-4 font-display text-xl">
-        {t(plan.coach_note)}
+        {coachNote}
       </blockquote>
       {t(
         plan.limitations_applied && (
@@ -482,7 +491,7 @@ function WorkoutView({
               !w.completed && /for time|chipper/i.test(plan.blocks[i]?.format ?? "") && (
                 <Input
                   className="w-36"
-                  aria-label={t(`${plan.blocks[i]?.name} finish time`)}
+                  aria-label={tx("{block} finish time", { block: t(plan.blocks[i]?.name ?? "") })}
                   placeholder={t("Finish time mm:ss")}
                   defaultValue={plan.blocks[i]?.result ?? ""}
                   onBlur={(e) => {
@@ -517,7 +526,7 @@ function WorkoutView({
             <>
               <div className="mt-3 grid grid-cols-[1fr_1fr_auto] gap-2">
                 <Input
-                  aria-label={t(`${e.name} weight used`)}
+                  aria-label={tx("{exercise} weight used", { exercise: t(e.name) })}
                   placeholder={t("Weight used")}
                   defaultValue={e.actual?.weight ?? ""}
                   onBlur={(ev) => {
@@ -534,7 +543,7 @@ function WorkoutView({
                   }}
                 />
                 <Input
-                  aria-label={t(`${e.name} reps done`)}
+                  aria-label={tx("{exercise} reps done", { exercise: t(e.name) })}
                   placeholder={t("Reps done")}
                   defaultValue={e.actual?.reps ?? ""}
                   onBlur={(ev) => {
@@ -554,7 +563,7 @@ function WorkoutView({
                   variant="outline"
                   size="icon"
                   className="h-11 w-11"
-                  aria-label={t(`Swap ${e.name}`)}
+                  aria-label={tx("Swap {exercise}", { exercise: t(e.name) })}
                   onClick={() => setOpenSwap(openSwap === `${i}-${j}` ? null : `${i}-${j}`)}
                 >
                   <Repeat2 />
@@ -635,8 +644,7 @@ function WorkoutView({
               )),
             )}
             <p className="mt-3">
-              {t(currentStreak)}
-              {t(" week streak · Next: ")}
+              {streakLabel} · {t("Next:")} {" "}
               {t(next)}
             </p>
             <Button

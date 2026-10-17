@@ -8,7 +8,7 @@ import { useRefresh } from "@/lib/data";
 import { Checkbox } from "./ui/checkbox";
 import { Button } from "./ui/button";
 export function Consent() {
-  const { t } = useTranslation();
+  const { t, tError } = useTranslation();
   const { user } = useAuth(),
     refresh = useRefresh();
   const [checked, setChecked] = useState(false),
@@ -60,7 +60,7 @@ export function Consent() {
       {t(
         error && (
           <p role="alert" className="mt-3">
-            {t(error)}
+            {tError(error)}
           </p>
         ),
       )}
