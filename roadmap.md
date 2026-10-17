@@ -1,4 +1,15 @@
 # Roadmap
+- [ ] Complete missing prerequisites and safe data ownership for the six uploaded briefs
+- [ ] Profile-driven workout library, equipment and beginner substitutions, no-repeat selection
+- [ ] Landing rebuild and no-account sample session
+- [ ] Signup/recovery, consent and three-step onboarding
+- [ ] Check-in validation, atomic workout save and automatic adjustment notes
+- [ ] Scores, structured logs, PR suggestions, streaks and completed summary
+- [ ] Insights charts and gated sleep/energy comparison
+- [ ] Privacy/terms, export/deletion, AI validation and repository hygiene
+- [ ] Shared data cache, accessibility, static-only PWA and install prompt
+- [ ] Verify public and signed-in flows and focused rule tests
+- [ ] Deferred: analytics and coach usage limits (user chose to postpone)
 - [x] Gender-neutral start screen and block-style Forge logo with matching app icon
 - [x] Sign-in, profile/goals setup
 - [x] Weekly planner (training days + muscle groups)
