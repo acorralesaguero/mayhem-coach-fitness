@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/_authenticated/insights")({
   component: Insights,
 });
 function Insights() {
+  const { t } = useTranslation();
   const { data: checks, isPending } = useCheckins(),
     { data: works } = useWorkouts(),
     { data: profile } = useProfile(),
@@ -58,54 +60,56 @@ function Insights() {
   const pattern = sleepPattern(checks);
   return (
     <div>
-      <h1 className="text-4xl">Your training, in perspective</h1>
-      <Section title="Energy and sleep · last 14 check-ins">
-        {series.length ? (
-          <div className="h-64 w-full min-w-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={series} margin={{ top: 10, right: 10, left: 0, bottom: 15 }}>
-                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
-                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                <YAxis
-                  yAxisId="energy"
-                  domain={[0, 5]}
-                  width={35}
-                  label={{ value: "Energy", angle: -90, position: "insideLeft" }}
-                />
-                <YAxis
-                  yAxisId="sleep"
-                  orientation="right"
-                  domain={[0, 12]}
-                  width={40}
-                  label={{ value: "Hours", angle: 90, position: "insideRight" }}
-                />
-                <Tooltip />
-                <Legend />
-                <Line
-                  yAxisId="energy"
-                  dataKey="energy"
-                  name="Energy"
-                  stroke="var(--clay)"
-                  isAnimationActive={false}
-                />
-                <Line
-                  yAxisId="sleep"
-                  dataKey="sleep"
-                  name="Sleep hours"
-                  stroke="var(--olive)"
-                  isAnimationActive={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        ) : (
-          <p>No check-ins yet.</p>
+      <h1 className="text-4xl">{t("Your training, in perspective")}</h1>
+      <Section title={t("Energy and sleep · last 14 check-ins")}>
+        {t(
+          series.length ? (
+            <div className="h-64 w-full min-w-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={series} margin={{ top: 10, right: 10, left: 0, bottom: 15 }}>
+                  <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                  <YAxis
+                    yAxisId="energy"
+                    domain={[0, 5]}
+                    width={35}
+                    label={{ value: "Energy", angle: -90, position: "insideLeft" }}
+                  />
+                  <YAxis
+                    yAxisId="sleep"
+                    orientation="right"
+                    domain={[0, 12]}
+                    width={40}
+                    label={{ value: "Hours", angle: 90, position: "insideRight" }}
+                  />
+                  <Tooltip />
+                  <Legend />
+                  <Line
+                    yAxisId="energy"
+                    dataKey="energy"
+                    name="Energy"
+                    stroke="var(--clay)"
+                    isAnimationActive={false}
+                  />
+                  <Line
+                    yAxisId="sleep"
+                    dataKey="sleep"
+                    name="Sleep hours"
+                    stroke="var(--olive)"
+                    isAnimationActive={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <p>{t("No check-ins yet.")}</p>
+          ),
         )}
       </Section>
-      <Section title="Pattern">
-        <p>{pattern ?? "Pattern unlocks after 14 check-ins"}</p>
+      <Section title={t("Pattern")}>
+        <p>{t(pattern ?? "Pattern unlocks after 14 check-ins")}</p>
       </Section>
-      <Section title="Sessions per week · last 8 weeks">
+      <Section title={t("Sessions per week · last 8 weeks")}>
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={weeks} margin={{ left: -20, right: 10 }}>
@@ -117,70 +121,90 @@ function Insights() {
           </ResponsiveContainer>
         </div>
       </Section>
-      <Section title="PR board · estimated 1RM">
-        {Object.entries(prs).length === 0 && (
-          <p className="text-muted-foreground">Log a lift with 1–10 reps to see your estimates.</p>
+      <Section title={t("PR board · estimated 1RM")}>
+        {t(
+          Object.entries(prs).length === 0 && (
+            <p className="text-muted-foreground">
+              {t("Log a lift with 1–10 reps to see your estimates.")}
+            </p>
+          ),
         )}
-        {Object.entries(prs).map(([key, pr]) => {
-          const lift = key as Lift,
-            base = profile[lift],
-            suggest = !dismissed.includes(key) && benchmarkSuggestion(pr.value, base);
-          return (
-            <div key={key} className="border-b py-4">
-              <div className="flex flex-wrap justify-between gap-3">
-                <span>{LIFT_LABELS[lift]}</span>
-                <span className="font-semibold">
-                  {pr.value.toFixed(1)} {profile.units}
-                </span>
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">{pr.date} · Epley estimate</p>
-              {suggest && (
-                <div className="mt-4">
-                  <p>
-                    Your logged {LIFT_LABELS[lift].toLowerCase()} suggests a 1RM of{" "}
-                    {roundLoad(pr.value, profile.units === "kg" ? "kg" : "lb")} {profile.units}.
-                    Update?
-                  </p>
-                  <div className="mt-3 flex gap-3">
-                    <Button
-                      variant="ink"
-                      onClick={async () => {
-                        const { error } = await supabase
-                          .from("profiles")
-                          .update({
-                            [lift]: roundLoad(pr.value, profile.units === "kg" ? "kg" : "lb"),
-                          } as Partial<Record<Lift, number>>)
-                          .eq("id", profile.id);
-                        if (error) toast.error(error.message);
-                        else await refresh();
-                      }}
-                    >
-                      Update
-                    </Button>
-                    <Button variant="outline" onClick={() => setDismissed([...dismissed, key])}>
-                      Dismiss
-                    </Button>
-                  </div>
+        {t(
+          Object.entries(prs).map(([key, pr]) => {
+            const lift = key as Lift,
+              base = profile[lift],
+              suggest = !dismissed.includes(key) && benchmarkSuggestion(pr.value, base);
+            return (
+              <div key={key} className="border-b py-4">
+                <div className="flex flex-wrap justify-between gap-3">
+                  <span>{t(LIFT_LABELS[lift])}</span>
+                  <span className="font-semibold">
+                    {t(pr.value.toFixed(1))} {t(profile.units)}
+                  </span>
                 </div>
-              )}
-            </div>
-          );
-        })}
-      </Section>
-      <Section title="Sessions">
-        <ul className="divide-y">
-          {works.map((w) => (
-            <li key={w.id} className="flex flex-wrap justify-between gap-3 py-4">
-              <div>
-                <p className="font-semibold">{w.title}</p>
-                <p className="text-sm text-muted-foreground">
-                  {w.workout_date} · {w.duration} min
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t(pr.date)}
+                  {t(" · Epley estimate")}
                 </p>
+                {t(
+                  suggest && (
+                    <div className="mt-4">
+                      <p>
+                        {t(" Your logged ")}
+                        {t(LIFT_LABELS[lift].toLowerCase())}
+                        {t(" suggests a 1RM of")}
+                        {t(" ")}
+                        {t(roundLoad(pr.value, profile.units === "kg" ? "kg" : "lb"))}{" "}
+                        {t(profile.units)}
+                        {t(". Update? ")}
+                      </p>
+                      <div className="mt-3 flex gap-3">
+                        <Button
+                          variant="ink"
+                          onClick={async () => {
+                            const { error } = await supabase
+                              .from("profiles")
+                              .update({
+                                [lift]: roundLoad(pr.value, profile.units === "kg" ? "kg" : "lb"),
+                              } as Partial<Record<Lift, number>>)
+                              .eq("id", profile.id);
+                            if (error) toast.error(error.message);
+                            else await refresh();
+                          }}
+                        >
+                          {t(" Update ")}
+                        </Button>
+                        <Button variant="outline" onClick={() => setDismissed([...dismissed, key])}>
+                          {t(" Dismiss ")}
+                        </Button>
+                      </div>
+                    </div>
+                  ),
+                )}
               </div>
-              <span>{w.completed ? `RPE ${w.rpe ?? "—"}` : "Not completed"}</span>
-            </li>
-          ))}
-          {!works.length && <li>No sessions yet.</li>}
+            );
+          }),
+        )}
+      </Section>
+      <Section title={t("Sessions")}>
+        <ul className="divide-y">
+          {t(
+            works.map((w) => (
+              <li key={w.id} className="flex flex-wrap justify-between gap-3 py-4">
+                <div>
+                  <p className="font-semibold">{t(w.title)}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t(w.workout_date)}
+                    {t(" · ")}
+                    {t(w.duration)}
+                    {t(" min ")}
+                  </p>
+                </div>
+                <span>{t(w.completed ? `RPE ${w.rpe ?? "—"}` : "Not completed")}</span>
+              </li>
+            )),
+          )}
+          {t(!works.length && <li>{t("No sessions yet.")}</li>)}
         </ul>
       </Section>
     </div>

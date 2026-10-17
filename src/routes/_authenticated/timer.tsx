@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play, RotateCcw } from "lucide-react";
@@ -66,6 +67,7 @@ function beep(freq = 880, dur = 0.15) {
 }
 
 function TimerPage() {
+  const { t } = useTranslation();
   const search = Route.useSearch();
   const { w: wid, b: bidx, ...cfgSearch } = search;
   const initial: TimerConfig = {
@@ -205,17 +207,19 @@ function TimerPage() {
   return (
     <div className="space-y-5">
       <p className="sr-only" aria-live="polite">
-        {st.phase === "done"
-          ? "Finished"
-          : st.phase === "rest"
-            ? "Rest"
-            : running
-              ? `Work, round ${st.round} of ${cfg.rounds}`
-              : "Stopped"}
+        {t(
+          st.phase === "done"
+            ? "Finished"
+            : st.phase === "rest"
+              ? "Rest"
+              : running
+                ? `Work, round ${st.round} of ${cfg.rounds}`
+                : "Stopped",
+        )}
       </p>
       <header>
-        <p className="eyebrow">Clock</p>
-        <h1 className="text-4xl">Timer</h1>
+        <p className="eyebrow">{t("Clock")}</p>
+        <h1 className="text-4xl">{t("Timer")}</h1>
       </header>
       <div className="-mx-1 overflow-x-auto px-1">
         <Chips
@@ -233,165 +237,205 @@ function TimerPage() {
           style={{ width: `${progress * 100}%` }}
         />
         <p className="eyebrow !text-current opacity-80">
-          {countdown != null
-            ? "Get ready"
-            : st.phase === "done"
-              ? "Stop · Time"
-              : stopped
-                ? "Paused"
-                : running && !isRest
-                  ? "Go"
-                  : isRest
-                    ? "Rest"
-                    : cfg.mode === "fortime"
-                      ? `Cap ${fmt(cfg.cap)}`
-                      : cfg.mode === "amrap"
-                        ? "AMRAP"
-                        : "Work"}
+          {t(
+            countdown != null
+              ? "Get ready"
+              : st.phase === "done"
+                ? "Stop · Time"
+                : stopped
+                  ? "Paused"
+                  : running && !isRest
+                    ? "Go"
+                    : isRest
+                      ? "Rest"
+                      : cfg.mode === "fortime"
+                        ? `Cap ${fmt(cfg.cap)}`
+                        : cfg.mode === "amrap"
+                          ? "AMRAP"
+                          : "Work",
+          )}
         </p>
         <div className="mt-2 font-display text-[6.5rem] leading-none tabular-nums">
-          {countdown ?? big}
+          {t(countdown ?? big)}
         </div>
-        {(cfg.mode === "emom" || cfg.mode === "tabata" || cfg.mode === "intervals") && (
-          <p className="mt-3 text-sm opacity-80">
-            Round {Math.min(st.round, cfg.rounds)} of {cfg.rounds}
-          </p>
+        {t(
+          (cfg.mode === "emom" || cfg.mode === "tabata" || cfg.mode === "intervals") && (
+            <p className="mt-3 text-sm opacity-80">
+              {t(" Round ")}
+              {t(Math.min(st.round, cfg.rounds))}
+              {t(" of ")}
+              {t(cfg.rounds)}
+            </p>
+          ),
         )}
-        {cfg.mode === "amrap" && (
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-            <Button
-              variant="outline"
-              className="h-11 bg-transparent text-current"
-              onClick={() => setRoundCount(roundCount + 1)}
-            >
-              Rounds: {roundCount} · +1
-            </Button>
-            <Input
-              aria-label="Additional reps"
-              type="number"
-              min={0}
-              value={extraReps}
-              onChange={(e) => setExtraReps(Math.max(0, Number(e.target.value)))}
-              className="w-24 bg-transparent text-current"
-            />
-          </div>
+        {t(
+          cfg.mode === "amrap" && (
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+              <Button
+                variant="outline"
+                className="h-11 bg-transparent text-current"
+                onClick={() => setRoundCount(roundCount + 1)}
+              >
+                {t(" Rounds: ")}
+                {t(roundCount)}
+                {t(" · +1 ")}
+              </Button>
+              <Input
+                aria-label={t("Additional reps")}
+                type="number"
+                min={0}
+                value={extraReps}
+                onChange={(e) => setExtraReps(Math.max(0, Number(e.target.value)))}
+                className="w-24 bg-transparent text-current"
+              />
+            </div>
+          ),
         )}
       </div>
 
       <div className="grid grid-cols-[1fr_auto] gap-3">
-        {running ? (
-          <Button
-            variant="outline"
-            size="xl"
-            className="rounded-full"
-            onClick={() => setRunning(false)}
-          >
-            <Pause /> Pause
-          </Button>
-        ) : (
-          <Button
-            variant="clay"
-            size="xl"
-            disabled={st.phase === "done"}
-            onClick={() => (elapsed === 0 ? setCountdown(3) : setRunning(true))}
-          >
-            <Play /> {elapsed === 0 ? "Start" : "Resume"}
-          </Button>
+        {t(
+          running ? (
+            <Button
+              variant="outline"
+              size="xl"
+              className="rounded-full"
+              onClick={() => setRunning(false)}
+            >
+              <Pause />
+              {t(" Pause ")}
+            </Button>
+          ) : (
+            <Button
+              variant="clay"
+              size="xl"
+              disabled={st.phase === "done"}
+              onClick={() => (elapsed === 0 ? setCountdown(3) : setRunning(true))}
+            >
+              <Play /> {t(elapsed === 0 ? "Start" : "Resume")}
+            </Button>
+          ),
         )}
         <Button
           variant="outline"
           size="xl"
           className="rounded-full"
           onClick={reset}
-          aria-label="Reset"
+          aria-label={t("Reset")}
         >
           <RotateCcw />
         </Button>
       </div>
 
-      {wid && (
-        <Button variant="outline" className="w-full" disabled={saving} onClick={saveScore}>
-          Save score
-        </Button>
+      {t(
+        wid && (
+          <Button variant="outline" className="w-full" disabled={saving} onClick={saveScore}>
+            {t(" Save score ")}
+          </Button>
+        ),
       )}
-      {block && (
-        <section className="surface p-5">
-          <p className="eyebrow">
-            {block.minutes} min · {block.format}
-          </p>
-          <h2 className="mt-1 text-2xl">{block.name}</h2>
-          {block.result && <p className="mt-2">Score: {block.result}</p>}
-          <ul className="mt-3 divide-y">
-            {block.exercises.map((e, j) => (
-              <li key={j} className="flex flex-wrap items-baseline justify-between gap-3 py-2">
-                <span className="min-w-0 font-medium">{e.name}</span>
-                <span className="shrink-0 text-sm text-clay">{e.prescription}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
+      {t(
+        block && (
+          <section className="surface p-5">
+            <p className="eyebrow">
+              {t(block.minutes)}
+              {t(" min · ")}
+              {t(block.format)}
+            </p>
+            <h2 className="mt-1 text-2xl">{t(block.name)}</h2>
+            {t(
+              block.result && (
+                <p className="mt-2">
+                  {t("Score: ")}
+                  {t(block.result)}
+                </p>
+              ),
+            )}
+            <ul className="mt-3 divide-y">
+              {t(
+                block.exercises.map((e, j) => (
+                  <li key={j} className="flex flex-wrap items-baseline justify-between gap-3 py-2">
+                    <span className="min-w-0 font-medium">{t(e.name)}</span>
+                    <span className="shrink-0 text-sm text-clay">{t(e.prescription)}</span>
+                  </li>
+                )),
+              )}
+            </ul>
+          </section>
+        ),
       )}
 
-      {editable && (
-        <section className="surface space-y-4 p-5">
-          <p className="eyebrow">Settings</p>
-          {(cfg.mode === "fortime" || cfg.mode === "amrap") && (
-            <Stepper
-              label={cfg.mode === "amrap" ? "Duration (min)" : "Time cap (min)"}
-              value={cfg.cap / 60}
-              min={1}
-              max={90}
-              onChange={(v) => setCfg({ ...cfg, cap: v * 60 })}
-            />
-          )}
-          {cfg.mode === "emom" && (
-            <>
-              <Stepper
-                label="Every (sec)"
-                value={cfg.work}
-                min={15}
-                max={300}
-                step={15}
-                onChange={(v) => setCfg({ ...cfg, work: v })}
-              />
-              <Stepper
-                label="Rounds"
-                value={cfg.rounds}
-                min={1}
-                max={60}
-                onChange={(v) => setCfg({ ...cfg, rounds: v })}
-              />
-            </>
-          )}
-          {(cfg.mode === "tabata" || cfg.mode === "intervals") && (
-            <>
-              <Stepper
-                label="Work (sec)"
-                value={cfg.work}
-                min={5}
-                max={600}
-                step={5}
-                onChange={(v) => setCfg({ ...cfg, work: v })}
-              />
-              <Stepper
-                label="Rest (sec)"
-                value={cfg.rest}
-                min={0}
-                max={600}
-                step={5}
-                onChange={(v) => setCfg({ ...cfg, rest: v })}
-              />
-              <Stepper
-                label="Rounds"
-                value={cfg.rounds}
-                min={1}
-                max={60}
-                onChange={(v) => setCfg({ ...cfg, rounds: v })}
-              />
-            </>
-          )}
-          <p className="text-xs text-muted-foreground">Total {fmt(total)}</p>
-        </section>
+      {t(
+        editable && (
+          <section className="surface space-y-4 p-5">
+            <p className="eyebrow">{t("Settings")}</p>
+            {t(
+              (cfg.mode === "fortime" || cfg.mode === "amrap") && (
+                <Stepper
+                  label={cfg.mode === "amrap" ? "Duration (min)" : "Time cap (min)"}
+                  value={cfg.cap / 60}
+                  min={1}
+                  max={90}
+                  onChange={(v) => setCfg({ ...cfg, cap: v * 60 })}
+                />
+              ),
+            )}
+            {t(
+              cfg.mode === "emom" && (
+                <>
+                  <Stepper
+                    label="Every (sec)"
+                    value={cfg.work}
+                    min={15}
+                    max={300}
+                    step={15}
+                    onChange={(v) => setCfg({ ...cfg, work: v })}
+                  />
+                  <Stepper
+                    label="Rounds"
+                    value={cfg.rounds}
+                    min={1}
+                    max={60}
+                    onChange={(v) => setCfg({ ...cfg, rounds: v })}
+                  />
+                </>
+              ),
+            )}
+            {t(
+              (cfg.mode === "tabata" || cfg.mode === "intervals") && (
+                <>
+                  <Stepper
+                    label="Work (sec)"
+                    value={cfg.work}
+                    min={5}
+                    max={600}
+                    step={5}
+                    onChange={(v) => setCfg({ ...cfg, work: v })}
+                  />
+                  <Stepper
+                    label="Rest (sec)"
+                    value={cfg.rest}
+                    min={0}
+                    max={600}
+                    step={5}
+                    onChange={(v) => setCfg({ ...cfg, rest: v })}
+                  />
+                  <Stepper
+                    label="Rounds"
+                    value={cfg.rounds}
+                    min={1}
+                    max={60}
+                    onChange={(v) => setCfg({ ...cfg, rounds: v })}
+                  />
+                </>
+              ),
+            )}
+            <p className="text-xs text-muted-foreground">
+              {t("Total ")}
+              {t(fmt(total))}
+            </p>
+          </section>
+        ),
       )}
     </div>
   );
@@ -412,28 +456,29 @@ function Stepper({
   max: number;
   step?: number;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-      <span className="text-sm">{label}</span>
+      <span className="text-sm">{t(label)}</span>
       <div className="flex items-center gap-2">
         <Button
           variant="outline"
           size="icon"
           className="h-11 w-11"
-          aria-label={`Decrease ${label}`}
+          aria-label={t(`Decrease ${label}`)}
           onClick={() => onChange(Math.max(min, value - step))}
         >
-          −
+          {t(" − ")}
         </Button>
-        <span className="w-12 text-center font-display text-2xl tabular-nums">{value}</span>
+        <span className="w-12 text-center font-display text-2xl tabular-nums">{t(value)}</span>
         <Button
           variant="outline"
           size="icon"
           className="h-11 w-11"
-          aria-label={`Increase ${label}`}
+          aria-label={t(`Increase ${label}`)}
           onClick={() => onChange(Math.min(max, value + step))}
         >
-          +
+          {t(" + ")}
         </Button>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
   component: Onboarding,
 });
 function Onboarding() {
+  const { t } = useTranslation();
   const { user } = useAuth(),
     { data: p } = useProfile(),
     refresh = useRefresh(),
@@ -49,21 +51,19 @@ function Onboarding() {
     if (!user) return;
     setBusy(true);
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .upsert({
-          id: user.id,
-          experience,
-          equipment,
-          days_per_week: days,
-          default_duration: duration,
-          units,
-          primary_goal: goal,
-          limitations,
-          par_q_ack_at: clear ? new Date().toISOString() : null,
-          ...(!skip ? bench : {}),
-          ...(finish ? { onboarded: true } : {}),
-        });
+      const { error } = await supabase.from("profiles").upsert({
+        id: user.id,
+        experience,
+        equipment,
+        days_per_week: days,
+        default_duration: duration,
+        units,
+        primary_goal: goal,
+        limitations,
+        par_q_ack_at: clear ? new Date().toISOString() : null,
+        ...(!skip ? bench : {}),
+        ...(finish ? { onboarded: true } : {}),
+      });
       if (error) throw error;
       if (finish) {
         const { error } = await supabase.from("week_plan").upsert(
@@ -82,97 +82,114 @@ function Onboarding() {
   }
   return (
     <div>
-      <p className="eyebrow">{step} of 3</p>
+      <p className="eyebrow">
+        {t(step)}
+        {t(" of 3")}
+      </p>
       <Progress value={(step / 3) * 100} className="mt-3 h-1" />
       <h1 className="mt-6 text-4xl">
-        {step === 1
-          ? "Your training rhythm"
-          : step === 2
-            ? "Your goal and safety"
-            : "Your starting weights"}
+        {t(
+          step === 1
+            ? "Your training rhythm"
+            : step === 2
+              ? "Your goal and safety"
+              : "Your starting weights",
+        )}
       </h1>
-      {step === 1 ? (
-        <>
-          <Section title="Experience">
-            <Chips options={EXPERIENCE} value={experience} onChange={setExperience} />
-          </Section>
-          <Section title="Equipment">
-            <Chips multi options={EQUIPMENT} value={equipment} onChange={setEquipment} />
-            <div className="mt-3 flex gap-2">
-              <Button variant="ghost" onClick={() => setEquipment(["Full gym"])}>
-                Full gym
-              </Button>
-              <Button variant="ghost" onClick={() => setEquipment(["Bodyweight only"])}>
-                Bodyweight only
-              </Button>
+      {t(
+        step === 1 ? (
+          <>
+            <Section title={t("Experience")}>
+              <Chips options={EXPERIENCE} value={experience} onChange={setExperience} />
+            </Section>
+            <Section title={t("Equipment")}>
+              <Chips multi options={EQUIPMENT} value={equipment} onChange={setEquipment} />
+              <div className="mt-3 flex gap-2">
+                <Button variant="ghost" onClick={() => setEquipment(["Full gym"])}>
+                  {t(" Full gym ")}
+                </Button>
+                <Button variant="ghost" onClick={() => setEquipment(["Bodyweight only"])}>
+                  {t(" Bodyweight only ")}
+                </Button>
+              </div>
+            </Section>
+            <Section title={t("Days per week")}>
+              <Chips options={[2, 3, 4, 5, 6]} value={days} onChange={setDays} />
+            </Section>
+            <Section title={t("Usual minutes")}>
+              <Chips options={DURATIONS} value={duration} onChange={setDuration} />
+            </Section>
+            <Section title={t("Units")}>
+              <Chips options={["lb", "kg"]} value={units} onChange={setUnits} />
+            </Section>
+          </>
+        ) : step === 2 ? (
+          <>
+            <Section title={t("Primary goal")}>
+              <Chips options={GOALS} value={goal} onChange={setGoal} />
+            </Section>
+            <Section title={t("Injuries or limitations (optional)")}>
+              <Textarea
+                maxLength={500}
+                value={limitations}
+                onChange={(e) => setLimitations(e.target.value)}
+              />
+              <p className="mt-2 text-sm text-muted-foreground">
+                {t("Forge is not medical advice.")}
+              </p>
+            </Section>
+            <label className="my-5 flex items-start gap-3">
+              <Checkbox
+                aria-label={t("I'm cleared to exercise and understand Forge is not medical advice")}
+                checked={clear}
+                onCheckedChange={(v) => setClear(v === true)}
+              />
+              <span>{t("I'm cleared to exercise and understand Forge is not medical advice")}</span>
+            </label>
+          </>
+        ) : (
+          <>
+            <p className="mt-4 text-muted-foreground">
+              {t("Optional best single lifts, in ")}
+              {t(units)}
+              {t(".")}
+            </p>
+            <div className="mt-6 grid grid-cols-2 gap-4">
+              {t(
+                Object.entries(LIFT_LABELS).map(([key, label]) => (
+                  <label key={key}>
+                    {t(label)}
+                    <Input
+                      aria-label={t(label)}
+                      inputMode="decimal"
+                      value={bench[key] ?? ""}
+                      onChange={(e) =>
+                        setBench({ ...bench, [key]: parseNumeric(e.target.value) ?? null })
+                      }
+                    />
+                  </label>
+                )),
+              )}
             </div>
-          </Section>
-          <Section title="Days per week">
-            <Chips options={[2, 3, 4, 5, 6]} value={days} onChange={setDays} />
-          </Section>
-          <Section title="Usual minutes">
-            <Chips options={DURATIONS} value={duration} onChange={setDuration} />
-          </Section>
-          <Section title="Units">
-            <Chips options={["lb", "kg"]} value={units} onChange={setUnits} />
-          </Section>
-        </>
-      ) : step === 2 ? (
-        <>
-          <Section title="Primary goal">
-            <Chips options={GOALS} value={goal} onChange={setGoal} />
-          </Section>
-          <Section title="Injuries or limitations (optional)">
-            <Textarea
-              maxLength={500}
-              value={limitations}
-              onChange={(e) => setLimitations(e.target.value)}
-            />
-            <p className="mt-2 text-sm text-muted-foreground">Forge is not medical advice.</p>
-          </Section>
-          <label className="my-5 flex items-start gap-3">
-            <Checkbox
-              aria-label="I'm cleared to exercise and understand Forge is not medical advice"
-              checked={clear}
-              onCheckedChange={(v) => setClear(v === true)}
-            />
-            <span>I'm cleared to exercise and understand Forge is not medical advice</span>
-          </label>
-        </>
-      ) : (
-        <>
-          <p className="mt-4 text-muted-foreground">Optional best single lifts, in {units}.</p>
-          <div className="mt-6 grid grid-cols-2 gap-4">
-            {Object.entries(LIFT_LABELS).map(([key, label]) => (
-              <label key={key}>
-                {label}
-                <Input
-                  aria-label={label}
-                  inputMode="decimal"
-                  value={bench[key] ?? ""}
-                  onChange={(e) =>
-                    setBench({ ...bench, [key]: parseNumeric(e.target.value) ?? null })
-                  }
-                />
-              </label>
-            ))}
-          </div>
-          <Button
-            variant="outline"
-            size="xl"
-            className="mt-6 w-full"
-            disabled={busy}
-            onClick={() => save(true, true)}
-          >
-            Skip — use scaled defaults
-          </Button>
-        </>
+            <Button
+              variant="outline"
+              size="xl"
+              className="mt-6 w-full"
+              disabled={busy}
+              onClick={() => save(true, true)}
+            >
+              {t(" Skip — use scaled defaults ")}
+            </Button>
+          </>
+        ),
       )}
       <div className="my-6 flex gap-3">
-        {step > 1 && (
-          <Button variant="outline" onClick={() => setStep(step - 1)}>
-            Back
-          </Button>
+        {t(
+          step > 1 && (
+            <Button variant="outline" onClick={() => setStep(step - 1)}>
+              {t(" Back ")}
+            </Button>
+          ),
         )}
         <Button
           variant="ink"
@@ -181,7 +198,7 @@ function Onboarding() {
           disabled={busy || (step === 2 && !clear)}
           onClick={() => save(step === 3)}
         >
-          {step === 3 ? "Start training" : "Continue"}
+          {t(step === 3 ? "Start training" : "Continue")}
         </Button>
       </div>
     </div>
