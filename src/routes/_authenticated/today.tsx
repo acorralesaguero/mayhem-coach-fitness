@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -42,6 +43,7 @@ export const Route = createFileRoute("/_authenticated/today")({
   component: TodayPage,
 });
 function TodayPage() {
+  const { t, language } = useTranslation();
   const { data: profile, error: profileError } = useProfile(),
     { data: week } = useWeekPlan(),
     { data: workout, isPending } = useTodayWorkout(),
@@ -99,6 +101,7 @@ function TodayPage() {
               await adjust({
                 data: {
                   workoutId: id,
+                  language,
                   message: ("Standing limitations: " + profile.limitations).slice(0, 500),
                 },
               });
@@ -114,7 +117,8 @@ function TodayPage() {
       /* Invalid or disabled storage. */
     }
   }, [profile, workout, isPending, importChecked, adjust, refresh]);
-  if (profileError) return <p role="alert">Your training data could not load. Please try again.</p>;
+  if (profileError)
+    return <p role="alert">{t("Your training data could not load. Please try again.")}</p>;
   if (!profile || isPending || importing || !profile.onboarded || !profile.par_q_ack_at)
     return <PageSkeleton />;
   const day = week?.find((d) => d.day_of_week === new Date().getDay());
@@ -122,30 +126,39 @@ function TodayPage() {
     <div className="space-y-4">
       <header>
         <p className="eyebrow">
-          {DAYS[new Date().getDay()]} ·{" "}
-          {new Date().toLocaleDateString(undefined, { month: "long", day: "numeric" })}
+          {t(DAYS[new Date().getDay()])}
+          {t(" ·")}
+          {t(" ")}
+          {t(
+            new Date().toLocaleDateString(language === "es" ? "es" : "en", {
+              month: "long",
+              day: "numeric",
+            }),
+          )}
         </p>
         <h1 className="mt-2 text-4xl">
-          {workout ? workout.title : `Morning, ${profile.display_name || "athlete"}.`}
+          {t(workout ? workout.title : `Morning, ${profile.display_name || "athlete"}.`)}
         </h1>
       </header>
-      {workout ? (
-        <WorkoutView
-          w={workout}
-          profile={profile}
-          works={works ?? []}
-          week={week ?? []}
-          onChange={refresh}
-        />
-      ) : (
-        <CheckIn
-          profile={profile}
-          initialDuration={day?.duration ?? profile.default_duration}
-          initialGroups={day?.muscle_groups ?? []}
-          restDay={day ? !day.is_training : false}
-          recentTitles={(works ?? []).slice(0, 20).map((w) => w.title)}
-          onDone={refresh}
-        />
+      {t(
+        workout ? (
+          <WorkoutView
+            w={workout}
+            profile={profile}
+            works={works ?? []}
+            week={week ?? []}
+            onChange={refresh}
+          />
+        ) : (
+          <CheckIn
+            profile={profile}
+            initialDuration={day?.duration ?? profile.default_duration}
+            initialGroups={day?.muscle_groups ?? []}
+            restDay={day ? !day.is_training : false}
+            recentTitles={(works ?? []).slice(0, 20).map((w) => w.title)}
+            onDone={refresh}
+          />
+        ),
       )}
     </div>
   );
@@ -165,6 +178,7 @@ function CheckIn({
   recentTitles: string[];
   onDone: () => Promise<void>;
 }) {
+  const { t, language } = useTranslation();
   const [duration, setDuration] = useState<30 | 60 | 90>(
       initialDuration === 30 ? 30 : initialDuration === 90 ? 90 : 60,
     ),
@@ -217,7 +231,7 @@ function CheckIn({
           .slice(0, 500);
         if (message.length >= 2)
           try {
-            await adjust({ data: { workoutId: id, message } });
+            await adjust({ data: { workoutId: id, language, message } });
           } catch {
             toast.error(
               "Couldn't apply your limitations automatically — use 'Ask your coach to adjust'.",
@@ -233,12 +247,14 @@ function CheckIn({
   }
   return (
     <div>
-      {restDay && (
-        <p className="text-muted-foreground">
-          Planned rest day. Choose mobility for an easy recovery session.
-        </p>
+      {t(
+        restDay && (
+          <p className="text-muted-foreground">
+            {t(" Planned rest day. Choose mobility for an easy recovery session. ")}
+          </p>
+        ),
       )}
-      <Section title="Readiness">
+      <Section title={t("Readiness")}>
         <div className="space-y-5">
           <Scale label="Energy" low="drained" high="charged" value={energy} onChange={setEnergy} />
           <Scale
@@ -250,12 +266,12 @@ function CheckIn({
           />
           <label className="block">
             <div className="flex justify-between">
-              <span>Hours slept</span>
-              <span>{sleep === null ? "—" : `${sleep} hours`}</span>
+              <span>{t("Hours slept")}</span>
+              <span>{t(sleep === null ? "—" : `${sleep} hours`)}</span>
             </div>
             <input
-              aria-label="Hours slept"
-              aria-valuetext={sleep === null ? "Not selected" : `${sleep} hours`}
+              aria-label={t("Hours slept")}
+              aria-valuetext={t(sleep === null ? "Not selected" : `${sleep} hours`)}
               type="range"
               min={0}
               max={12}
@@ -273,7 +289,7 @@ function CheckIn({
           </label>
         </div>
         <details className="mt-5">
-          <summary className="min-h-11 cursor-pointer">More detail</summary>
+          <summary className="min-h-11 cursor-pointer">{t("More detail")}</summary>
           <div className="space-y-5">
             <Scale
               label="Sleep quality"
@@ -293,22 +309,22 @@ function CheckIn({
           </div>
         </details>
       </Section>
-      <Section title="Session">
+      <Section title={t("Session")}>
         <Chips options={DURATIONS} value={duration} onChange={setDuration} />
         <details className="mt-4">
-          <summary className="min-h-11 cursor-pointer">Change focus</summary>
+          <summary className="min-h-11 cursor-pointer">{t("Change focus")}</summary>
           <Chips multi options={MUSCLE_GROUPS} value={groups} onChange={setGroups} />
         </details>
         <Chips label="Workout tier" options={["scaled", "rx"]} value={tier} onChange={setTier} />
       </Section>
-      <Section title="Anything to account for today?">
+      <Section title={t("Anything to account for today?")}>
         <Textarea
           maxLength={500}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Equipment, space, or something your coach should know"
+          placeholder={t("Equipment, space, or something your coach should know")}
         />
-        <p className="mt-2 text-sm text-muted-foreground">Forge is not medical advice.</p>
+        <p className="mt-2 text-sm text-muted-foreground">{t("Forge is not medical advice.")}</p>
       </Section>
       <Button
         variant="clay"
@@ -317,7 +333,7 @@ function CheckIn({
         disabled={busy || energy === null || soreness === null || sleep === null}
         onClick={submit}
       >
-        {busy ? "Preparing your session…" : `Get today's ${duration}-minute workout`}
+        {t(busy ? "Preparing your session…" : `Get today's ${duration}-minute workout`)}
       </Button>
     </div>
   );
@@ -335,6 +351,7 @@ function WorkoutView({
   week: Database["public"]["Tables"]["week_plan"]["Row"][];
   onChange: () => Promise<void>;
 }) {
+  const { t, language } = useTranslation();
   const initial = w.plan as unknown as WorkoutPlan;
   const [plan, setPlan] = useState(initial),
     [rpe, setRpe] = useState(w.rpe ?? 7),
@@ -368,7 +385,7 @@ function WorkoutView({
     if (note.trim().length < 2) return;
     setBusy(true);
     try {
-      await adjust({ data: { workoutId: w.id, message: note.trim() } });
+      await adjust({ data: { workoutId: w.id, language, message: note.trim() } });
       setNote("");
       await onChange();
       toast.success("Session adjusted");
@@ -401,43 +418,52 @@ function WorkoutView({
   return (
     <div>
       <p className="text-sm text-muted-foreground">
-        {w.duration} min · {plan.intensity}
+        {t(w.duration)}
+        {t(" min · ")}
+        {t(plan.intensity)}
       </p>
       <blockquote className="my-5 border-l-4 border-clay pl-4 font-display text-xl">
-        {plan.coach_note}
+        {t(plan.coach_note)}
       </blockquote>
-      {plan.limitations_applied && (
-        <p className="text-sm text-muted-foreground">
-          Limitations applied: {plan.limitations_applied}
-        </p>
+      {t(
+        plan.limitations_applied && (
+          <p className="text-sm text-muted-foreground">
+            {t(" Limitations applied: ")}
+            {t(plan.limitations_applied)}
+          </p>
+        ),
       )}
-      {!w.completed && (
-        <Section title="Ask your coach to adjust">
-          <div className="flex gap-2">
-            <Input
-              aria-label="Coach adjustment note"
-              maxLength={500}
-              value={note}
-              disabled={busy}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="No rower, limited space…"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") ask();
-              }}
-            />
-            <Button
-              variant="ink"
-              size="icon"
-              className="h-11 w-11 shrink-0"
-              disabled={busy || note.trim().length < 2}
-              onClick={ask}
-              aria-label="Send to coach"
-            >
-              <Send />
-            </Button>
-          </div>
-          <p className="mt-2 text-sm text-muted-foreground">Forge is not medical advice.</p>
-        </Section>
+      {t(
+        !w.completed && (
+          <Section title={t("Ask your coach to adjust")}>
+            <div className="flex gap-2">
+              <Input
+                aria-label={t("Coach adjustment note")}
+                maxLength={500}
+                value={note}
+                disabled={busy}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder={t("No rower, limited space…")}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") ask();
+                }}
+              />
+              <Button
+                variant="ink"
+                size="icon"
+                className="h-11 w-11 shrink-0"
+                disabled={busy || note.trim().length < 2}
+                onClick={ask}
+                aria-label={t("Send to coach")}
+              >
+                <Send />
+              </Button>
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {t("Forge is not medical advice.")}
+            </p>
+          </Section>
+        ),
       )}
       <WorkoutBlocks
         plan={plan}
@@ -452,45 +478,51 @@ function WorkoutView({
                   b: i,
                 }}
               >
-                <Timer /> Timer
+                <Timer />
+                {t(" Timer ")}
               </Link>
             </Button>
-            {!w.completed && /for time|chipper/i.test(plan.blocks[i]?.format ?? "") && (
-              <Input
-                className="w-36"
-                aria-label={`${plan.blocks[i]?.name} finish time`}
-                placeholder="Finish time mm:ss"
-                defaultValue={plan.blocks[i]?.result ?? ""}
-                onBlur={(e) => {
-                  const value = e.target.value;
-                  if (value && !/^\d{1,3}:[0-5]\d$/.test(value)) {
-                    toast.error("Use mm:ss for finish time");
-                    return;
-                  }
-                  savePlan({
-                    ...plan,
-                    blocks: plan.blocks.map((b, j) => (j === i ? { ...b, result: value } : b)),
-                  });
-                }}
-              />
+            {t(
+              !w.completed && /for time|chipper/i.test(plan.blocks[i]?.format ?? "") && (
+                <Input
+                  className="w-36"
+                  aria-label={t(`${plan.blocks[i]?.name} finish time`)}
+                  placeholder={t("Finish time mm:ss")}
+                  defaultValue={plan.blocks[i]?.result ?? ""}
+                  onBlur={(e) => {
+                    const value = e.target.value;
+                    if (value && !/^\d{1,3}:[0-5]\d$/.test(value)) {
+                      toast.error("Use mm:ss for finish time");
+                      return;
+                    }
+                    savePlan({
+                      ...plan,
+                      blocks: plan.blocks.map((b, j) => (j === i ? { ...b, result: value } : b)),
+                    });
+                  }}
+                />
+              ),
             )}
           </div>
         )}
         exerciseTools={(e, i, j) =>
           w.completed ? (
             <>
-              {(e.actual?.weight || e.actual?.reps) && (
-                <p className="mt-2 text-sm">
-                  Logged: {e.actual.weight} {e.actual.reps && `· ${e.actual.reps} reps`}
-                </p>
+              {t(
+                (e.actual?.weight || e.actual?.reps) && (
+                  <p className="mt-2 text-sm">
+                    {t(" Logged: ")}
+                    {t(e.actual.weight)} {t(e.actual.reps && `· ${e.actual.reps} reps`)}
+                  </p>
+                ),
               )}
             </>
           ) : (
             <>
               <div className="mt-3 grid grid-cols-[1fr_1fr_auto] gap-2">
                 <Input
-                  aria-label={`${e.name} weight used`}
-                  placeholder="Weight used"
+                  aria-label={t(`${e.name} weight used`)}
+                  placeholder={t("Weight used")}
                   defaultValue={e.actual?.weight ?? ""}
                   onBlur={(ev) => {
                     if (ev.target.value === (e.actual?.weight ?? "")) return;
@@ -506,8 +538,8 @@ function WorkoutView({
                   }}
                 />
                 <Input
-                  aria-label={`${e.name} reps done`}
-                  placeholder="Reps done"
+                  aria-label={t(`${e.name} reps done`)}
+                  placeholder={t("Reps done")}
                   defaultValue={e.actual?.reps ?? ""}
                   onBlur={(ev) => {
                     if (ev.target.value === (e.actual?.reps ?? "")) return;
@@ -526,132 +558,153 @@ function WorkoutView({
                   variant="outline"
                   size="icon"
                   className="h-11 w-11"
-                  aria-label={`Swap ${e.name}`}
+                  aria-label={t(`Swap ${e.name}`)}
                   onClick={() => setOpenSwap(openSwap === `${i}-${j}` ? null : `${i}-${j}`)}
                 >
                   <Repeat2 />
                 </Button>
               </div>
-              {openSwap === `${i}-${j}` && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {swapOptions(e.name)
-                    .map((name) =>
-                      adaptExercise({ ...e, name }, profile.equipment, profile.experience),
-                    )
-                    .filter((x, k, a) => a.findIndex((y) => y.name === x.name) === k)
-                    .map((x) => (
-                      <Button
-                        key={x.name}
-                        variant="outline"
-                        className="min-h-11"
-                        onClick={() => {
-                          setOpenSwap(null);
-                          savePlan(
-                            patchEx(i, j, {
-                              ...x,
-                              swapped_from: e.swapped_from ?? e.name,
-                              lift: undefined,
-                              actual: undefined,
-                              prescription:
-                                (e.prescription.split(" @ ")[0] ?? e.prescription) +
-                                (["Dumbbells", "Kettlebells"].includes(x.requires ?? "")
-                                  ? " @ choose a load (RPE 7)"
-                                  : ""),
-                            }),
-                          );
-                        }}
-                      >
-                        {x.name}
-                      </Button>
-                    ))}
-                </div>
+              {t(
+                openSwap === `${i}-${j}` && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {t(
+                      swapOptions(e.name)
+                        .map((name) =>
+                          adaptExercise({ ...e, name }, profile.equipment, profile.experience),
+                        )
+                        .filter((x, k, a) => a.findIndex((y) => y.name === x.name) === k)
+                        .map((x) => (
+                          <Button
+                            key={x.name}
+                            variant="outline"
+                            className="min-h-11"
+                            onClick={() => {
+                              setOpenSwap(null);
+                              savePlan(
+                                patchEx(i, j, {
+                                  ...x,
+                                  swapped_from: e.swapped_from ?? e.name,
+                                  lift: undefined,
+                                  actual: undefined,
+                                  prescription:
+                                    (e.prescription.split(" @ ")[0] ?? e.prescription) +
+                                    (["Dumbbells", "Kettlebells"].includes(x.requires ?? "")
+                                      ? " @ choose a load (RPE 7)"
+                                      : ""),
+                                }),
+                              );
+                            }}
+                          >
+                            {t(x.name)}
+                          </Button>
+                        )),
+                    )}
+                  </div>
+                ),
               )}
             </>
           )
         }
       />
-      <Section title="Cooldown">
-        <p>{plan.cooldown}</p>
+      <Section title={t("Cooldown")}>
+        <p>{t(plan.cooldown)}</p>
       </Section>
-      {w.completed ? (
-        <Section title="Session complete">
-          <p>
-            {w.duration} min · RPE {w.rpe}
-          </p>
-          {plan.blocks
-            .filter((b) => b.result)
-            .map((b) => (
-              <p key={b.name} className="mt-2">
-                {b.name}: {b.result}
-              </p>
-            ))}
-          {newPrs.map(([lift, pr]) => (
-            <p key={lift} className="mt-2 text-olive">
-              Best recent {lift.replaceAll("_", " ")}: {pr.value.toFixed(1)} {profile.units}
+      {t(
+        w.completed ? (
+          <Section title={t("Session complete")}>
+            <p>
+              {t(w.duration)}
+              {t(" min · RPE ")}
+              {t(w.rpe)}
             </p>
-          ))}
-          <p className="mt-3">
-            {currentStreak} week streak · Next: {next}
-          </p>
-          <Button
-            variant="outline"
-            className="mt-4"
-            onClick={async () => {
-              try {
-                await navigator.clipboard.writeText(recap);
-                toast.success("Summary copied");
-              } catch {
-                toast.error("Clipboard unavailable");
-              }
-            }}
-          >
-            <Copy /> Copy summary
-          </Button>
-        </Section>
-      ) : (
-        <Section title="Finish & log">
-          <label className="block">
-            Effort (RPE): {rpe}
-            <input
-              type="range"
-              min={1}
-              max={10}
-              value={rpe}
-              aria-label="Effort"
-              aria-valuetext={`${rpe} of 10`}
-              onChange={(e) => setRpe(Number(e.target.value))}
-              className="my-3 min-h-11 w-full accent-clay"
+            {t(
+              plan.blocks
+                .filter((b) => b.result)
+                .map((b) => (
+                  <p key={b.name} className="mt-2">
+                    {t(b.name)}
+                    {t(": ")}
+                    {t(b.result)}
+                  </p>
+                )),
+            )}
+            {t(
+              newPrs.map(([lift, pr]) => (
+                <p key={lift} className="mt-2 text-olive">
+                  {t(" Best recent ")}
+                  {t(lift.replaceAll("_", " "))}
+                  {t(": ")}
+                  {t(pr.value.toFixed(1))} {t(profile.units)}
+                </p>
+              )),
+            )}
+            <p className="mt-3">
+              {t(currentStreak)}
+              {t(" week streak · Next: ")}
+              {t(next)}
+            </p>
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(recap);
+                  toast.success("Summary copied");
+                } catch {
+                  toast.error("Clipboard unavailable");
+                }
+              }}
+            >
+              <Copy />
+              {t(" Copy summary ")}
+            </Button>
+          </Section>
+        ) : (
+          <Section title={t("Finish & log")}>
+            <label className="block">
+              {t(" Effort (RPE): ")}
+              {t(rpe)}
+              <input
+                type="range"
+                min={1}
+                max={10}
+                value={rpe}
+                aria-label={t("Effort")}
+                aria-valuetext={t(`${rpe} of 10`)}
+                onChange={(e) => setRpe(Number(e.target.value))}
+                className="my-3 min-h-11 w-full accent-clay"
+              />
+            </label>
+            <Textarea
+              aria-label={t("Workout feedback")}
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
+              placeholder={t("How did it feel?")}
             />
-          </label>
-          <Textarea
-            aria-label="Workout feedback"
-            value={feedback}
-            onChange={(e) => setFeedback(e.target.value)}
-            placeholder="How did it feel?"
-          />
-          <Button
-            variant="ink"
-            size="xl"
-            className="mt-4 w-full"
-            disabled={busy}
-            onClick={async () => {
-              setBusy(true);
-              const { error } = await supabase
-                .from("workouts")
-                .update({ completed: true, rpe, feedback })
-                .eq("id", w.id)
-                .eq("user_id", profile.id);
-              setBusy(false);
-              if (error) toast.error(error.message);
-              else {
-                toast.success("Logged. Great work.");
-                await onChange();
-              }
-            }}
-          >
-            Mark complete
-          </Button>
-        </Section>
+            <Button
+              variant="ink"
+              size="xl"
+              className="mt-4 w-full"
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                const { error } = await supabase
+                  .from("workouts")
+                  .update({ completed: true, rpe, feedback })
+                  .eq("id", w.id)
+                  .eq("user_id", profile.id);
+                setBusy(false);
+                if (error) toast.error(error.message);
+                else {
+                  toast.success("Logged. Great work.");
+                  await onChange();
+                }
+              }}
+            >
+              {t(" Mark complete ")}
+            </Button>
+          </Section>
+        ),
       )}
     </div>
   );

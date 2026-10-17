@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/_authenticated/week")({
 type Day = { day_of_week: number; is_training: boolean; muscle_groups: string[]; duration: number };
 
 function WeekPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [days, setDays] = useState<Day[] | null>(null);
   const [open, setOpen] = useState<number | null>(new Date().getDay());
@@ -61,66 +63,77 @@ function WeekPage() {
   return (
     <div className="space-y-4">
       <header>
-        <p className="eyebrow">Weekly program</p>
-        <h1 className="text-4xl">Shape your week</h1>
+        <p className="eyebrow">{t("Weekly program")}</p>
+        <h1 className="text-4xl">{t("Shape your week")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {count} training {count === 1 ? "day" : "days"} · tap a day to set its focus
+          {t(count)}
+          {t(" training ")}
+          {t(count === 1 ? "day" : "days")}
+          {t(" · tap a day to set its focus ")}
         </p>
       </header>
-      {week?.some((d) => d.suggested) && (
-        <p className="text-sm text-olive">Suggested for you — edit anything</p>
+      {t(
+        week?.some((d) => d.suggested) && (
+          <p className="text-sm text-olive">{t("Suggested for you — edit anything")}</p>
+        ),
       )}
       <div className="space-y-2">
-        {days.map((d) => (
-          <div key={d.day_of_week} className="surface overflow-hidden">
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 p-4">
-              <Button
-                variant="ghost"
-                className="h-auto min-h-11 min-w-0 justify-start text-left"
-                onClick={() => setOpen(open === d.day_of_week ? null : d.day_of_week)}
-              >
-                <div className="font-display text-2xl leading-none">{DAYS[d.day_of_week]}</div>
-                <div className="mt-1 truncate text-xs text-muted-foreground">
-                  {d.is_training
-                    ? `${d.duration} min · ${d.muscle_groups.join(", ") || "choose focus"}`
-                    : "Rest / active recovery"}
-                </div>
-              </Button>
-              <Switch
-                aria-label={`Train on ${DAYS[d.day_of_week]}`}
-                checked={d.is_training}
-                onCheckedChange={(v) => {
-                  update(d.day_of_week, { is_training: v });
-                  if (v) setOpen(d.day_of_week);
-                }}
-              />
-            </div>
-            {open === d.day_of_week && d.is_training && (
-              <div className="space-y-4 border-t p-4">
-                <div>
-                  <p className="eyebrow mb-2">Focus</p>
-                  <Chips
-                    multi
-                    options={MUSCLE_GROUPS}
-                    value={d.muscle_groups}
-                    onChange={(v: string[]) => update(d.day_of_week, { muscle_groups: v })}
-                  />
-                </div>
-                <div>
-                  <p className="eyebrow mb-2">Minutes</p>
-                  <Chips
-                    options={DURATIONS}
-                    value={d.duration}
-                    onChange={(v: number) => update(d.day_of_week, { duration: v })}
-                  />
-                </div>
+        {t(
+          days.map((d) => (
+            <div key={d.day_of_week} className="surface overflow-hidden">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 p-4">
+                <Button
+                  variant="ghost"
+                  className="h-auto min-h-11 min-w-0 justify-start text-left"
+                  onClick={() => setOpen(open === d.day_of_week ? null : d.day_of_week)}
+                >
+                  <div className="font-display text-2xl leading-none">{t(DAYS[d.day_of_week])}</div>
+                  <div className="mt-1 truncate text-xs text-muted-foreground">
+                    {t(
+                      d.is_training
+                        ? `${d.duration} min · ${d.muscle_groups.join(", ") || "choose focus"}`
+                        : "Rest / active recovery",
+                    )}
+                  </div>
+                </Button>
+                <Switch
+                  aria-label={t(`Train on ${DAYS[d.day_of_week]}`)}
+                  checked={d.is_training}
+                  onCheckedChange={(v) => {
+                    update(d.day_of_week, { is_training: v });
+                    if (v) setOpen(d.day_of_week);
+                  }}
+                />
               </div>
-            )}
-          </div>
-        ))}
+              {t(
+                open === d.day_of_week && d.is_training && (
+                  <div className="space-y-4 border-t p-4">
+                    <div>
+                      <p className="eyebrow mb-2">{t("Focus")}</p>
+                      <Chips
+                        multi
+                        options={MUSCLE_GROUPS}
+                        value={d.muscle_groups}
+                        onChange={(v: string[]) => update(d.day_of_week, { muscle_groups: v })}
+                      />
+                    </div>
+                    <div>
+                      <p className="eyebrow mb-2">{t("Minutes")}</p>
+                      <Chips
+                        options={DURATIONS}
+                        value={d.duration}
+                        onChange={(v: number) => update(d.day_of_week, { duration: v })}
+                      />
+                    </div>
+                  </div>
+                ),
+              )}
+            </div>
+          )),
+        )}
       </div>
       <Button variant="ink" size="xl" className="w-full" onClick={save}>
-        Save week
+        {t(" Save week ")}
       </Button>
     </div>
   );

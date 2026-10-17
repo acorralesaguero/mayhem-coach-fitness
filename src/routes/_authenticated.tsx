@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n";
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { CalendarDays, Flame, LineChart, Timer, User } from "lucide-react";
@@ -21,6 +22,7 @@ const NAV = [
 ] as const;
 
 function Layout() {
+  const { t } = useTranslation();
   const { session, loading } = useAuth();
   const navigate = useNavigate();
   const { data: profile } = useProfile();
@@ -31,29 +33,33 @@ function Layout() {
 
   return (
     <div className="min-h-[100dvh] pb-24">
-      {session && <InstallPrompt />}
+      {t(session && <InstallPrompt />)}
       <div className="mx-auto max-w-xl px-5 pt-6">
-        {loading || !session || !profile ? (
-          <PageSkeleton />
-        ) : !profile.terms_accepted_at ? (
-          <Consent />
-        ) : (
-          <Outlet />
+        {t(
+          loading || !session || !profile ? (
+            <PageSkeleton />
+          ) : !profile.terms_accepted_at ? (
+            <Consent />
+          ) : (
+            <Outlet />
+          ),
         )}
       </div>
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
         <div className="mx-auto grid max-w-xl grid-cols-5">
-          {NAV.map(({ to, label, icon: Icon }) => (
-            <Link
-              key={to}
-              to={to}
-              className="flex flex-col items-center gap-1 py-3 text-[11px] text-muted-foreground"
-              activeProps={{ className: "!text-foreground" }}
-            >
-              <Icon className="h-5 w-5" />
-              {label}
-            </Link>
-          ))}
+          {t(
+            NAV.map(({ to, label, icon: Icon }) => (
+              <Link
+                key={to}
+                to={to}
+                className="flex flex-col items-center gap-1 py-3 text-[11px] text-muted-foreground"
+                activeProps={{ className: "!text-foreground" }}
+              >
+                <Icon className="h-5 w-5" />
+                {t(label)}
+              </Link>
+            )),
+          )}
         </div>
       </nav>
     </div>

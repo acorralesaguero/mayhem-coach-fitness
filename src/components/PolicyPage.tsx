@@ -1,6 +1,8 @@
+import { useTranslation } from "@/lib/i18n";
 import { Link } from "@tanstack/react-router";
 import { BRAND } from "@/lib/brand";
 export function PolicyPage({ kind }: { kind: "privacy" | "terms" }) {
+  const { t } = useTranslation();
   const sections =
     kind === "privacy"
       ? [
@@ -61,20 +63,25 @@ export function PolicyPage({ kind }: { kind: "privacy" | "terms" }) {
         ];
   return (
     <main className="mx-auto max-w-2xl px-6 py-10">
-      <Link to="/">← {BRAND.name}</Link>
+      <Link to="/">
+        {t("← ")}
+        {t(BRAND.name)}
+      </Link>
       <h1 className="mt-8 text-5xl">
-        {kind === "privacy" ? "Privacy Policy" : "Terms of Service"}
+        {t(kind === "privacy" ? "Privacy Policy" : "Terms of Service")}
       </h1>
-      <p className="mt-3 text-muted-foreground">Effective October 17, 2026</p>
-      {sections.map(([title, text]) => (
-        <section key={title} className="mt-8">
-          <h2 className="text-2xl">{title}</h2>
-          <p className="mt-3 leading-relaxed">{text}</p>
-        </section>
-      ))}
+      <p className="mt-3 text-muted-foreground">{t("Effective October 17, 2026")}</p>
+      {t(
+        sections.map(([title, text]) => (
+          <section key={title} className="mt-8">
+            <h2 className="text-2xl">{t(title)}</h2>
+            <p className="mt-3 leading-relaxed">{t(text)}</p>
+          </section>
+        )),
+      )}
       <div className="mt-10 flex gap-5">
-        <Link to="/privacy">Privacy</Link>
-        <Link to="/terms">Terms</Link>
+        <Link to="/privacy">{t("Privacy")}</Link>
+        <Link to="/terms">{t("Terms")}</Link>
       </div>
     </main>
   );

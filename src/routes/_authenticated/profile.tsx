@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/_authenticated/profile")({
   component: ProfilePage,
 });
 function ProfilePage() {
+  const { t } = useTranslation();
   const { data: profile, error } = useProfile(),
     refresh = useRefresh();
   const [p, setP] = useState<Profile | null>(null),
@@ -31,7 +33,7 @@ function ProfilePage() {
   useEffect(() => {
     if (profile) setP(profile);
   }, [profile]);
-  if (error) return <p role="alert">Your profile could not load. Please try again.</p>;
+  if (error) return <p role="alert">{t("Your profile could not load. Please try again.")}</p>;
   if (!p) return <PageSkeleton />;
   const set = (key: keyof Profile, value: unknown) => setP({ ...p, [key]: value });
   async function save() {
@@ -86,25 +88,25 @@ function ProfilePage() {
   return (
     <div>
       <header className="flex justify-between gap-3">
-        <h1 className="text-4xl">Your blueprint</h1>
+        <h1 className="text-4xl">{t("Your blueprint")}</h1>
         <Button variant="ghost" onClick={() => supabase.auth.signOut()}>
-          Sign out
+          {t(" Sign out ")}
         </Button>
       </header>
-      <Section title="Primary goal">
+      <Section title={t("Primary goal")}>
         <Chips options={GOALS} value={p.primary_goal} onChange={(v) => set("primary_goal", v)} />
       </Section>
-      <Section title="Experience">
+      <Section title={t("Experience")}>
         <Chips options={EXPERIENCE} value={p.experience} onChange={(v) => set("experience", v)} />
       </Section>
-      <Section title="Usual minutes">
+      <Section title={t("Usual minutes")}>
         <Chips
           options={DURATIONS}
           value={p.default_duration}
           onChange={(v) => set("default_duration", v)}
         />
       </Section>
-      <Section title="Equipment">
+      <Section title={t("Equipment")}>
         <Chips
           multi
           options={EQUIPMENT}
@@ -112,84 +114,89 @@ function ProfilePage() {
           onChange={(v) => set("equipment", v)}
         />
       </Section>
-      <Section title="Benchmarks (1-rep max)">
+      <Section title={t("Benchmarks (1-rep max)")}>
         <Chips options={["lb", "kg"]} value={p.units} onChange={(v) => set("units", v)} />
         <div className="mt-4 grid grid-cols-2 gap-4">
-          {Object.entries({
-            ...LIFT_LABELS,
-            bodyweight: "Bodyweight",
-            max_pullups: "Max pull-ups",
-            max_pushups: "Max push-ups",
-          }).map(([key, label]) => (
-            <label key={key} className="text-sm">
-              {label}
-              <Input
-                inputMode="decimal"
-                aria-label={label}
-                value={String(p[key as keyof Profile] ?? "")}
-                className="mt-1 h-11"
-                onChange={(e) => set(key as keyof Profile, parseNumeric(e.target.value) ?? null)}
-              />
-            </label>
-          ))}
+          {t(
+            Object.entries({
+              ...LIFT_LABELS,
+              bodyweight: "Bodyweight",
+              max_pullups: "Max pull-ups",
+              max_pushups: "Max push-ups",
+            }).map(([key, label]) => (
+              <label key={key} className="text-sm">
+                {t(label)}
+                <Input
+                  inputMode="decimal"
+                  aria-label={t(label)}
+                  value={String(p[key as keyof Profile] ?? "")}
+                  className="mt-1 h-11"
+                  onChange={(e) => set(key as keyof Profile, parseNumeric(e.target.value) ?? null)}
+                />
+              </label>
+            )),
+          )}
         </div>
       </Section>
-      <Section title="Injuries or limitations">
+      <Section title={t("Injuries or limitations")}>
         <Textarea
           maxLength={500}
           value={p.limitations ?? ""}
           onChange={(e) => set("limitations", e.target.value)}
         />
-        <p className="mt-2 text-sm text-muted-foreground">Forge is not medical advice.</p>
+        <p className="mt-2 text-sm text-muted-foreground">{t("Forge is not medical advice.")}</p>
       </Section>
       <Button variant="ink" size="xl" className="my-5 w-full" disabled={busy} onClick={save}>
-        Save profile
+        {t(" Save profile ")}
       </Button>
-      <Section title="Your account">
+      <Section title={t("Your account")}>
         <Button variant="outline" className="w-full" onClick={exportData} disabled={busy}>
-          Download my data
+          {t(" Download my data ")}
         </Button>
         <Button
           variant="ghost"
           className="mt-3 w-full text-destructive"
           onClick={() => setDeleting(!deleting)}
         >
-          Delete my account
+          {t(" Delete my account ")}
         </Button>
-        {deleting && (
-          <div className="mt-4 space-y-3">
-            <p>
-              Deleting your account permanently removes your profile and training history. Type
-              DELETE to confirm.
-            </p>
-            <Input
-              aria-label="Deletion confirmation"
-              value={confirmation}
-              onChange={(e) => setConfirmation(e.target.value)}
-            />
-            <Button
-              variant="destructive"
-              disabled={confirmation !== "DELETE" || busy}
-              onClick={async () => {
-                setBusy(true);
-                try {
-                  await remove({ data: { confirmation: "DELETE" } });
-                  await supabase.auth.signOut();
-                  window.location.assign("/");
-                } catch (e) {
-                  toast.error((e as Error).message);
-                  setBusy(false);
-                }
-              }}
-            >
-              Permanently delete account
-            </Button>
-          </div>
+        {t(
+          deleting && (
+            <div className="mt-4 space-y-3">
+              <p>
+                {t(
+                  " Deleting your account permanently removes your profile and training history. Type DELETE to confirm. ",
+                )}
+              </p>
+              <Input
+                aria-label={t("Deletion confirmation")}
+                value={confirmation}
+                onChange={(e) => setConfirmation(e.target.value)}
+              />
+              <Button
+                variant="destructive"
+                disabled={confirmation !== "DELETE" || busy}
+                onClick={async () => {
+                  setBusy(true);
+                  try {
+                    await remove({ data: { confirmation: "DELETE" } });
+                    await supabase.auth.signOut();
+                    window.location.assign("/");
+                  } catch (e) {
+                    toast.error((e as Error).message);
+                    setBusy(false);
+                  }
+                }}
+              >
+                {t(" Permanently delete account ")}
+              </Button>
+            </div>
+          ),
         )}
       </Section>
       <div className="my-5 flex gap-5 text-sm">
-        <Link to="/privacy">Privacy</Link>
-        <Link to="/terms">Terms</Link>
+        <Link to="/privacy">{t("Privacy")}</Link>
+        <Link to="/terms">{t("Terms")}</Link>
       </div>
     </div>
   );

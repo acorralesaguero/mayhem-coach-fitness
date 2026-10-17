@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import hero from "@/assets/forge-start.jpg";
 import avif800 from "@/assets/forge-start-800.avif";
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 function Home() {
+  const { t } = useTranslation();
   const plan = buildSession({
     date: new Date(2026, 9, 17),
     duration: 60,
@@ -63,7 +65,7 @@ function Home() {
           <source type="image/webp" srcSet={`${webp800} 800w, ${webp1600} 1600w`} sizes="100vw" />
           <img
             src={hero}
-            alt="Kettlebell and plates in a sunlit gym"
+            alt={t("Kettlebell and plates in a sunlit gym")}
             width={1024}
             height={1536}
             fetchPriority="high"
@@ -74,64 +76,70 @@ function Home() {
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/90 to-ink/50" />
         <div className="relative mx-auto max-w-5xl px-6 pb-12 pt-7">
           <header className="mb-20 flex items-center justify-between gap-4">
-            <img src={logo} alt={BRAND.name} width={260} height={54} className="w-40" />
+            <img src={logo} alt={t(BRAND.name)} width={260} height={54} className="w-40" />
             <Button
               asChild
               variant="outline"
               className="border-ink-foreground/40 bg-transparent text-ink-foreground"
             >
               <Link to="/auth" search={{ mode: "signin" }}>
-                Sign in
+                {t(" Sign in ")}
               </Link>
             </Button>
           </header>
           <p className="eyebrow text-sand">
-            {BRAND.name} · {BRAND.tagline}
+            {t(BRAND.name)}
+            {t(" · ")}
+            {t(BRAND.tagline)}
           </p>
           <h1 className="mt-4 max-w-2xl text-5xl leading-tight sm:text-6xl">
-            Workouts that adapt to how you slept.
+            {t(" Workouts that adapt to how you slept. ")}
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed">
-            Strength, engine and skill sessions in 30, 60 or 90 minutes. Check in with your energy
-            and sleep, and {BRAND.name} adjusts your loads and your session for your equipment and
-            injuries.
+            {t(
+              " Strength, engine and skill sessions in 30, 60 or 90 minutes. Check in with your energy and sleep, and ",
+            )}
+            {t(BRAND.name)}
+            {t(" adjusts your loads and your session for your equipment and injuries. ")}
           </p>
           <Button asChild variant="clay" size="xl" className="mt-7">
-            <Link to="/try">Try today's workout — no account</Link>
+            <Link to="/try">{t("Try today's workout — no account")}</Link>
           </Button>
         </div>
       </section>
       <div className="mx-auto max-w-5xl px-6">
         <section className="py-12">
-          <h2 className="text-4xl">How it works</h2>
+          <h2 className="text-4xl">{t("How it works")}</h2>
           <div className="mt-6 grid gap-7 sm:grid-cols-3">
-            {[
-              ["01", "Check in", "Tell us your energy, soreness and hours slept."],
+            {t(
               [
-                "02",
-                "Get your session",
-                "Pre-written programming fits your readiness and equipment.",
-              ],
-              [
-                "03",
-                "Log and progress",
-                "Record your weights and scores, and follow your progress.",
-              ],
-            ].map(([n, title, desc]) => (
-              <div key={n}>
-                <p className="text-clay">{n}</p>
-                <h3 className="mt-2 text-2xl">{title}</h3>
-                <p className="mt-2 text-base text-muted-foreground">{desc}</p>
-              </div>
-            ))}
+                ["01", "Check in", "Tell us your energy, soreness and hours slept."],
+                [
+                  "02",
+                  "Get your session",
+                  "Pre-written programming fits your readiness and equipment.",
+                ],
+                [
+                  "03",
+                  "Log and progress",
+                  "Record your weights and scores, and follow your progress.",
+                ],
+              ].map(([n, title, desc]) => (
+                <div key={n}>
+                  <p className="text-clay">{t(n)}</p>
+                  <h3 className="mt-2 text-2xl">{t(title)}</h3>
+                  <p className="mt-2 text-base text-muted-foreground">{t(desc)}</p>
+                </div>
+              )),
+            )}
           </div>
         </section>
         <section className="border-t py-10">
-          <p className="eyebrow">Today's sample · 60 minutes</p>
-          <h2 className="mt-2 text-3xl">{plan.title}</h2>
+          <p className="eyebrow">{t("Today's sample · 60 minutes")}</p>
+          <h2 className="mt-2 text-3xl">{t(plan.title)}</h2>
           <Accordion type="single" collapsible>
             <AccordionItem value="sample">
-              <AccordionTrigger>See the full session</AccordionTrigger>
+              <AccordionTrigger>{t("See the full session")}</AccordionTrigger>
               <AccordionContent>
                 <WorkoutBlocks plan={plan} />
               </AccordionContent>
@@ -139,35 +147,37 @@ function Home() {
           </Accordion>
         </section>
         <section className="border-t py-10">
-          <h2 className="text-4xl">A few questions</h2>
+          <h2 className="text-4xl">{t("A few questions")}</h2>
           <Accordion type="single" collapsible>
-            {[
+            {t(
               [
-                "Is this AI?",
-                "Sessions are pre-written programming. Loads adapt to your check-in, and an AI assistant can modify a session for equipment or injuries.",
-              ],
-              [
-                "What equipment do I need?",
-                "Choose a full gym, dumbbells and a kettlebell, or bodyweight only.",
-              ],
-              ["Is it free?", FAQ_COPY.price],
-              [
-                "Is this medical advice?",
-                "No. Consult a physician before starting an exercise program.",
-              ],
-            ].map(([q, a]) => (
-              <AccordionItem key={q} value={q ?? "question"}>
-                <AccordionTrigger>{q}</AccordionTrigger>
-                <AccordionContent className="text-base">{a}</AccordionContent>
-              </AccordionItem>
-            ))}
+                [
+                  "Is this AI?",
+                  "Sessions are pre-written programming. Loads adapt to your check-in, and an AI assistant can modify a session for equipment or injuries.",
+                ],
+                [
+                  "What equipment do I need?",
+                  "Choose a full gym, dumbbells and a kettlebell, or bodyweight only.",
+                ],
+                ["Is it free?", FAQ_COPY.price],
+                [
+                  "Is this medical advice?",
+                  "No. Consult a physician before starting an exercise program.",
+                ],
+              ].map(([q, a]) => (
+                <AccordionItem key={q} value={q ?? "question"}>
+                  <AccordionTrigger>{t(q)}</AccordionTrigger>
+                  <AccordionContent className="text-base">{t(a)}</AccordionContent>
+                </AccordionItem>
+              )),
+            )}
           </Accordion>
         </section>
         <footer className="flex flex-wrap justify-between gap-4 border-t py-8 text-base text-muted-foreground">
-          <span>{BRAND.name}</span>
+          <span>{t(BRAND.name)}</span>
           <div className="flex gap-5">
-            <Link to="/privacy">Privacy</Link>
-            <Link to="/terms">Terms</Link>
+            <Link to="/privacy">{t("Privacy")}</Link>
+            <Link to="/terms">{t("Terms")}</Link>
           </div>
         </footer>
       </div>

@@ -1,3 +1,5 @@
+import { LanguageProvider } from "@/lib/i18n";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -18,7 +20,7 @@ import "@fontsource/manrope/600.css";
 import "@fontsource/manrope/700.css";
 import displayFont from "@fontsource/cormorant-garamond/files/cormorant-garamond-latin-500-normal.woff2?url";
 import bodyFont from "@fontsource/manrope/files/manrope-latin-400-normal.woff2?url";
-import { BRAND,SITE_URL } from "@/lib/brand";
+import { BRAND, SITE_URL } from "@/lib/brand";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -32,7 +34,10 @@ function NotFoundComponent() {
         <h1 className="text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
         <div className="mt-6">
-          <Link to="/" className="inline-flex rounded-full bg-primary px-5 py-2 text-sm text-primary-foreground">
+          <Link
+            to="/"
+            className="inline-flex rounded-full bg-primary px-5 py-2 text-sm text-primary-foreground"
+          >
             Go home
           </Link>
         </div>
@@ -71,7 +76,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: `${BRAND.name} — ${BRAND.tagline}` },
-      { name: "description", content: "Fixed functional-fitness sessions adapted to your week and readiness." },
+      {
+        name: "description",
+        content: "Fixed functional-fitness sessions adapted to your week and readiness.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#33312e" },
@@ -79,10 +87,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.png", type: "image/png" },
-      {rel:"preload",href:displayFont,as:"font",type:"font/woff2",crossOrigin:"anonymous"},
-      {rel:"preload",href:bodyFont,as:"font",type:"font/woff2",crossOrigin:"anonymous"},
-      {rel:"manifest",href:"/manifest.webmanifest"},
-      {rel:"apple-touch-icon",href:"/icon-180.png"},
+      {
+        rel: "preload",
+        href: displayFont,
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
+      { rel: "preload", href: bodyFont, as: "font", type: "font/woff2", crossOrigin: "anonymous" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/icon-180.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -107,13 +121,31 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const router=useRouter();
-  useEffect(()=>{const {data}=supabase.auth.onAuthStateChange(event=>{if(!["SIGNED_IN","SIGNED_OUT","USER_UPDATED"].includes(event))return;router.invalidate();if(event==="SIGNED_OUT")queryClient.clear();else queryClient.invalidateQueries();});return()=>data.subscription.unsubscribe();},[router,queryClient]);
-  useEffect(()=>{if(window.location.hostname===new URL(SITE_URL).hostname&&window.self===window.top&&"serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});},[]);
+  const router = useRouter();
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (!["SIGNED_IN", "SIGNED_OUT", "USER_UPDATED"].includes(event)) return;
+      router.invalidate();
+      if (event === "SIGNED_OUT") queryClient.clear();
+      else queryClient.invalidateQueries();
+    });
+    return () => data.subscription.unsubscribe();
+  }, [router, queryClient]);
+  useEffect(() => {
+    if (
+      window.location.hostname === new URL(SITE_URL).hostname &&
+      window.self === window.top &&
+      "serviceWorker" in navigator
+    )
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
-      <Toaster position="top-center" />
+      <LanguageProvider>
+        <LanguageSelector />
+        <Outlet />
+        <Toaster position="top-center" />
+      </LanguageProvider>
     </QueryClientProvider>
   );
 }

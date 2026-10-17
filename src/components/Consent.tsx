@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAuth } from "@/lib/use-auth";
@@ -7,6 +8,7 @@ import { useRefresh } from "@/lib/data";
 import { Checkbox } from "./ui/checkbox";
 import { Button } from "./ui/button";
 export function Consent() {
+  const { t } = useTranslation();
   const { user } = useAuth(),
     refresh = useRefresh();
   const [checked, setChecked] = useState(false),
@@ -14,23 +16,26 @@ export function Consent() {
     [error, setError] = useState("");
   return (
     <div className="py-12">
-      <h1 className="text-4xl">Before you begin</h1>
+      <h1 className="text-4xl">{t("Before you begin")}</h1>
       <label className="mt-6 flex gap-3">
         <Checkbox
           checked={checked}
           onCheckedChange={(v) => setChecked(v === true)}
-          aria-label="I'm 18 or older and agree to the Terms and Privacy Policy"
+          aria-label={t("I'm 18 or older and agree to the Terms and Privacy Policy")}
         />
         <span>
-          I'm 18 or older and agree to the{" "}
+          {t(" I'm 18 or older and agree to the")}
+          {t(" ")}
           <Link to="/terms" className="underline">
-            Terms
-          </Link>{" "}
-          and{" "}
-          <Link to="/privacy" className="underline">
-            Privacy Policy
+            {t(" Terms ")}
           </Link>
-          .
+          {t(" ")}
+          {t(" and")}
+          {t(" ")}
+          <Link to="/privacy" className="underline">
+            {t(" Privacy Policy ")}
+          </Link>
+          {t(" . ")}
         </span>
       </label>
       <Button
@@ -50,12 +55,14 @@ export function Consent() {
           else await refresh();
         }}
       >
-        Agree and continue
+        {t(" Agree and continue ")}
       </Button>
-      {error && (
-        <p role="alert" className="mt-3">
-          {error}
-        </p>
+      {t(
+        error && (
+          <p role="alert" className="mt-3">
+            {t(error)}
+          </p>
+        ),
       )}
     </div>
   );

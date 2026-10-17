@@ -1,3 +1,4 @@
+import { useTranslation } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { pageHead } from "@/lib/brand";
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/try")({
   component: TryPage,
 });
 function TryPage() {
+  const { t } = useTranslation();
   const [duration, setDuration] = useState<30 | 60 | 90>(60),
     [equipment, setEquipment] = useState("Full gym"),
     [energy, setEnergy] = useState<number | null>(null),
@@ -56,20 +58,20 @@ function TryPage() {
   return (
     <main className="mx-auto max-w-xl px-5 py-8">
       <Link to="/" className="text-muted-foreground">
-        ← Home
+        {t(" ← Home ")}
       </Link>
-      <h1 className="mt-6 text-4xl">Try your session</h1>
-      <Section title="Minutes">
+      <h1 className="mt-6 text-4xl">{t("Try your session")}</h1>
+      <Section title={t("Minutes")}>
         <Chips options={[30, 60, 90]} value={duration} onChange={setDuration} />
       </Section>
-      <Section title="Equipment">
+      <Section title={t("Equipment")}>
         <Chips
           options={["Full gym", "Dumbbells + kettlebell", "Bodyweight only"]}
           value={equipment}
           onChange={setEquipment}
         />
       </Section>
-      <Section title="Readiness">
+      <Section title={t("Readiness")}>
         <Scale label="Energy" value={energy} onChange={setEnergy} low="drained" high="charged" />
       </Section>
       <Button
@@ -79,20 +81,22 @@ function TryPage() {
         disabled={energy === null}
         onClick={generate}
       >
-        Get my sample workout
+        {t(" Get my sample workout ")}
       </Button>
-      {plan && (
-        <>
-          <h2 className="text-3xl">{plan.title}</h2>
-          <p className="mt-3 text-muted-foreground">{plan.coach_note}</p>
-          <WorkoutBlocks plan={plan} />
-          <p className="my-5">{plan.cooldown}</p>
-          <Button asChild variant="ink" size="xl" className="w-full" onClick={preserve}>
-            <Link to="/auth" search={{ mode: "signup", from: "try" }}>
-              Save this session — create free account
-            </Link>
-          </Button>
-        </>
+      {t(
+        plan && (
+          <>
+            <h2 className="text-3xl">{t(plan.title)}</h2>
+            <p className="mt-3 text-muted-foreground">{t(plan.coach_note)}</p>
+            <WorkoutBlocks plan={plan} />
+            <p className="my-5">{t(plan.cooldown)}</p>
+            <Button asChild variant="ink" size="xl" className="w-full" onClick={preserve}>
+              <Link to="/auth" search={{ mode: "signup", from: "try" }}>
+                {t(" Save this session — create free account ")}
+              </Link>
+            </Button>
+          </>
+        ),
       )}
     </main>
   );
