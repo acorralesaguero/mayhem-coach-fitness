@@ -6,7 +6,7 @@ import avif1600 from "@/assets/forge-start-1600.avif";
 import webp800 from "@/assets/forge-start-800.webp";
 import webp1600 from "@/assets/forge-start-1600.webp";
 import logo from "@/assets/forge-logo.png";
-import { BRAND, pageHead, SITE_URL } from "@/lib/brand";
+import { BRAND, pageHead } from "@/lib/brand";
 import { buildSession } from "@/lib/program";
 import { WorkoutBlocks } from "@/components/WorkoutBlocks";
 import { Button } from "@/components/ui/button";
@@ -27,14 +27,7 @@ export const Route = createFileRoute("/")({
       "Strength, engine and skill in 30, 60 or 90 minutes, adapted to your readiness and equipment.",
       "/",
     );
-    return {
-      ...h,
-      meta: [
-        ...h.meta,
-        { property: "og:image", content: SITE_URL + "/forge-cover.jpg" },
-        { name: "twitter:image", content: SITE_URL + "/forge-cover.jpg" },
-      ],
-    };
+    return h;
   },
   component: Home,
 });
