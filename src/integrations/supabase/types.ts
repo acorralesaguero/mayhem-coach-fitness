@@ -23,11 +23,14 @@ export type Database = {
           energy: number
           id: string
           motivation: number
+          motivation_detail: number | null
           notes: string | null
           sleep_hours: number
           sleep_quality: number
+          sleep_quality_detail: number | null
           soreness: number
           stress: number
+          stress_detail: number | null
           user_id: string
         }
         Insert: {
@@ -38,11 +41,14 @@ export type Database = {
           energy: number
           id?: string
           motivation: number
+          motivation_detail?: number | null
           notes?: string | null
           sleep_hours: number
           sleep_quality: number
+          sleep_quality_detail?: number | null
           soreness: number
           stress: number
+          stress_detail?: number | null
           user_id: string
         }
         Update: {
@@ -53,14 +59,25 @@ export type Database = {
           energy?: number
           id?: string
           motivation?: number
+          motivation_detail?: number | null
           notes?: string | null
           sleep_hours?: number
           sleep_quality?: number
+          sleep_quality_detail?: number | null
           soreness?: number
           stress?: number
+          stress_detail?: number | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "checkin_profile_owner"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -70,6 +87,7 @@ export type Database = {
           clean_jerk: number | null
           created_at: string
           current_body_type: string | null
+          days_per_week: number
           deadlift: number | null
           default_duration: number
           display_name: string | null
@@ -81,12 +99,15 @@ export type Database = {
           max_pullups: number | null
           max_pushups: number | null
           onboarded: boolean
+          par_q_ack_at: string | null
           primary_goal: string | null
           progression_style: string | null
           push_press: number | null
           snatch: number | null
           strict_press: number | null
           target_physique: string | null
+          terms_accepted_at: string | null
+          terms_version: string | null
           units: string
           updated_at: string
         }
@@ -97,6 +118,7 @@ export type Database = {
           clean_jerk?: number | null
           created_at?: string
           current_body_type?: string | null
+          days_per_week?: number
           deadlift?: number | null
           default_duration?: number
           display_name?: string | null
@@ -108,12 +130,15 @@ export type Database = {
           max_pullups?: number | null
           max_pushups?: number | null
           onboarded?: boolean
+          par_q_ack_at?: string | null
           primary_goal?: string | null
           progression_style?: string | null
           push_press?: number | null
           snatch?: number | null
           strict_press?: number | null
           target_physique?: string | null
+          terms_accepted_at?: string | null
+          terms_version?: string | null
           units?: string
           updated_at?: string
         }
@@ -124,6 +149,7 @@ export type Database = {
           clean_jerk?: number | null
           created_at?: string
           current_body_type?: string | null
+          days_per_week?: number
           deadlift?: number | null
           default_duration?: number
           display_name?: string | null
@@ -135,12 +161,15 @@ export type Database = {
           max_pullups?: number | null
           max_pushups?: number | null
           onboarded?: boolean
+          par_q_ack_at?: string | null
           primary_goal?: string | null
           progression_style?: string | null
           push_press?: number | null
           snatch?: number | null
           strict_press?: number | null
           target_physique?: string | null
+          terms_accepted_at?: string | null
+          terms_version?: string | null
           units?: string
           updated_at?: string
         }
@@ -153,6 +182,7 @@ export type Database = {
           id: string
           is_training: boolean
           muscle_groups: string[]
+          suggested: boolean
           user_id: string
         }
         Insert: {
@@ -161,6 +191,7 @@ export type Database = {
           id?: string
           is_training?: boolean
           muscle_groups?: string[]
+          suggested?: boolean
           user_id: string
         }
         Update: {
@@ -169,9 +200,18 @@ export type Database = {
           id?: string
           is_training?: boolean
           muscle_groups?: string[]
+          suggested?: boolean
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "week_profile_owner"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workouts: {
         Row: {
@@ -218,6 +258,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "workout_profile_owner"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "workouts_checkin_id_fkey"
             columns: ["checkin_id"]
             isOneToOne: false
@@ -231,7 +278,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_checkin_and_workout: {
+        Args: { checkin_data: Json; workout_data: Json }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
