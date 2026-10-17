@@ -1,54 +1,16 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { createFileRoute,Link } from "@tanstack/react-router";
 import hero from "@/assets/forge-start.jpg";
+import avif800 from "@/assets/forge-start-800.avif";
+import avif1600 from "@/assets/forge-start-1600.avif";
+import webp800 from "@/assets/forge-start-800.webp";
+import webp1600 from "@/assets/forge-start-1600.webp";
 import logo from "@/assets/forge-logo.png";
+import { BRAND,pageHead,SITE_URL } from "@/lib/brand";
+import { buildSession } from "@/lib/program";
+import { WorkoutBlocks } from "@/components/WorkoutBlocks";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/lib/use-auth";
-
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Forge — Your Hybrid Athlete Coach" },
-      { name: "description", content: "Functional fitness coaching that adapts to your sleep, energy and week. 30, 60 and 90 minute sessions." },
-      { property: "og:title", content: "Forge — Your Hybrid Athlete Coach" },
-      { property: "og:description", content: "Functional fitness coaching that adapts to your sleep, energy and week." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: Index,
-});
-
-function Index() {
-  const { session } = useAuth();
-  const navigate = useNavigate();
-  useEffect(() => {
-    if (session) navigate({ to: "/today" });
-  }, [session, navigate]);
-
-  return (
-    <main className="relative min-h-[100dvh] overflow-hidden bg-ink text-ink-foreground">
-      <img src={hero} alt="Kettlebell and weight plates in a sunlit functional fitness gym" width={1024} height={1536}
-        className="absolute inset-0 h-full w-full object-cover object-center" />
-      <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/60 to-transparent" />
-      <div className="relative mx-auto flex min-h-[100dvh] max-w-xl flex-col justify-between px-6 pb-10 pt-8">
-        <h1 className="w-full max-w-sm">
-          <img src={logo} alt="Forge" width={1346} height={280} className="h-auto w-full" />
-        </h1>
-        <div>
-          <p className="eyebrow !text-sand">Hybrid athlete coaching</p>
-          <h2 className="mt-3 text-5xl leading-[1] sm:text-6xl">
-            Train with intent.<br /><em className="text-sand">Adapt every day.</em>
-          </h2>
-          <p className="mt-5 max-w-sm text-sm leading-relaxed opacity-80">
-            Strength, engine and skill — programmed around your week and how you actually feel this morning.
-            Sessions in 30, 60 or 90 minutes.
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Button asChild variant="clay" size="xl"><Link to="/auth">Start training</Link></Button>
-          </div>
-        </div>
-      </div>
-    </main>
-  );
-}
+import { Accordion,AccordionItem,AccordionTrigger,AccordionContent } from "@/components/ui/accordion";
+export const SHOW_TESTIMONIALS=false;
+export const FAQ_COPY={price:"A sample session is available without an account. Pricing details are not yet available."};
+export const Route=createFileRoute("/")({head:()=>{const h=pageHead("Adaptive functional-fitness workouts","Strength, engine and skill in 30, 60 or 90 minutes, adapted to your readiness and equipment.","/");return {...h,meta:[...h.meta,{property:"og:image",content:SITE_URL+"/forge-cover.jpg"},{name:"twitter:image",content:SITE_URL+"/forge-cover.jpg"}]};},component:Home});
+function Home(){const plan=buildSession({date:new Date(2026,9,17),duration:60,groups:["Full body"],benchmarks:{},readiness:{energy:3,sleep_hours:7,sleep_quality:null,stress:null,soreness:3,motivation:null},tier:"scaled",equipment:["Full gym"],experience:"Intermediate"});return <main><section className="relative overflow-hidden bg-ink text-ink-foreground"><picture><source type="image/avif" srcSet={`${avif800} 800w, ${avif1600} 1600w`} sizes="100vw"/><source type="image/webp" srcSet={`${webp800} 800w, ${webp1600} 1600w`} sizes="100vw"/><img src={hero} alt="Kettlebell and plates in a sunlit gym" width={1024} height={1536} fetchPriority="high" decoding="async" className="absolute inset-0 h-full w-full object-cover object-center"/></picture><div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/90 to-ink/50"/><div className="relative mx-auto max-w-5xl px-6 pb-12 pt-7"><header className="mb-20 flex items-center justify-between gap-4"><img src={logo} alt={BRAND.name} width={260} height={54} className="w-40"/><Button asChild variant="outline" className="border-ink-foreground/40 bg-transparent text-ink-foreground"><Link to="/auth" search={{mode:"signin"}}>Sign in</Link></Button></header><p className="eyebrow text-sand">{BRAND.name} · {BRAND.tagline}</p><h1 className="mt-4 max-w-2xl text-5xl leading-tight sm:text-6xl">Workouts that adapt to how you slept.</h1><p className="mt-5 max-w-xl text-base leading-relaxed">Strength, engine and skill sessions in 30, 60 or 90 minutes. Check in with your energy and sleep, and {BRAND.name} adjusts your loads and your session for your equipment and injuries.</p><Button asChild variant="clay" size="xl" className="mt-7"><Link to="/try">Try today's workout — no account</Link></Button></div></section><div className="mx-auto max-w-5xl px-6"><section className="py-12"><h2 className="text-4xl">How it works</h2><div className="mt-6 grid gap-7 sm:grid-cols-3">{[["01","Check in","Tell us your energy, soreness and hours slept."],["02","Get your session","Pre-written programming fits your readiness and equipment."],["03","Log and progress","Record your weights and scores, and follow your progress."]].map(([n,title,desc])=><div key={n}><p className="text-clay">{n}</p><h3 className="mt-2 text-2xl">{title}</h3><p className="mt-2 text-base text-muted-foreground">{desc}</p></div>)}</div></section><section className="border-t py-10"><p className="eyebrow">Today's sample · 60 minutes</p><h2 className="mt-2 text-3xl">{plan.title}</h2><Accordion type="single" collapsible><AccordionItem value="sample"><AccordionTrigger>See the full session</AccordionTrigger><AccordionContent><WorkoutBlocks plan={plan}/></AccordionContent></AccordionItem></Accordion></section><section className="border-t py-10"><h2 className="text-4xl">A few questions</h2><Accordion type="single" collapsible>{[["Is this AI?","Sessions are pre-written programming. Loads adapt to your check-in, and an AI assistant can modify a session for equipment or injuries."],["What equipment do I need?","Choose a full gym, dumbbells and a kettlebell, or bodyweight only."],["Is it free?",FAQ_COPY.price],["Is this medical advice?","No. Consult a physician before starting an exercise program."]].map(([q,a])=><AccordionItem key={q} value={q??"question"}><AccordionTrigger>{q}</AccordionTrigger><AccordionContent className="text-base">{a}</AccordionContent></AccordionItem>)}</Accordion></section><footer className="flex flex-wrap justify-between gap-4 border-t py-8 text-base text-muted-foreground"><span>{BRAND.name}</span><div className="flex gap-5"><Link to="/privacy">Privacy</Link><Link to="/terms">Terms</Link></div></footer></div></main>;}

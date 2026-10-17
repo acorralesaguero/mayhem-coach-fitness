@@ -1,0 +1,4 @@
+const CACHE='forge-static-v1';
+self.addEventListener('install',()=>self.skipWaiting());
+self.addEventListener('activate',event=>event.waitUntil((async()=>{for(const key of await caches.keys())if(key!==CACHE)await caches.delete(key);await self.clients.claim();})()));
+self.addEventListener('fetch',event=>{const req=event.request,url=new URL(req.url);if(req.method!=='GET'||url.origin!==self.location.origin||req.mode==='navigate'||url.pathname.startsWith('/api/')||url.pathname.includes('supabase')||url.search||req.headers.has('Authorization'))return;const staticFile=/^\/assets\/.*\.(woff2|png|jpg|jpeg|webp|avif|svg|css|js)$/.test(url.pathname)||/^\/icon-\d+\.png$/.test(url.pathname);if(!staticFile)return;event.respondWith((async()=>{const cache=await caches.open(CACHE);const hit=await cache.match(req);if(hit)return hit;const response=await fetch(req);if(response.ok)await cache.put(req,response.clone());return response;})());});

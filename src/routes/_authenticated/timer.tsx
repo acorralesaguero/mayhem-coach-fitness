@@ -4,6 +4,10 @@ import { Pause, Play, RotateCcw } from "lucide-react";
 import { computeState, PRESETS, totalDuration, type TimerConfig, type TimerMode } from "@/lib/timer";
 import { Button } from "@/components/ui/button";
 import { Chips } from "@/components/Chips";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { pageHead } from "@/lib/brand";
+import { useRefresh } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
 import type { WorkoutPlan } from "@/lib/program";
 
@@ -25,7 +29,7 @@ export const Route = createFileRoute("/_authenticated/timer")({
     rounds: s["rounds"] != null ? Number(s["rounds"]) : undefined,
     cap: s["cap"] != null ? Number(s["cap"]) : undefined,
   }),
-  head: () => ({ meta: [{ title: "Workout timer — Forge" }, { name: "description", content: "EMOM, AMRAP, Tabata, intervals and for-time clock." }] }),
+  head: () => pageHead("Workout timer","EMOM, AMRAP, Tabata, intervals and for-time clock."),
   component: TimerPage,
 });
 
@@ -52,6 +56,16 @@ function TimerPage() {
   }, [wid, bidx]);
   const [cfg, setCfg] = useState<TimerConfig>(initial);
   const [elapsed, setElapsed] = useState(0);
+  const [roundCount,setRoundCount]=useState(0);
+  const [extraReps,setExtraReps]=useState(0);
+  const [saving,setSaving]=useState(false);
+  const savedRef=useRef(false);
+  const refresh=useRefresh();
+  async function saveScore(){
+    if(!wid || bidx==null || saving)return;
+    setSaving(true);
+    try{const {data,error}=await supabase.from("workouts").select("plan").eq("id",wid).single();if(error)throw error;const plan=data.plan as unknown as WorkoutPlan;if(!plan.blocks[bidx])throw new Error("Block not found");const result=cfg.mode==="amrap"?`${roundCount} rounds (+ ${extraReps} reps)`:fmt(elapsed);const next={...plan,blocks:plan.blocks.map((b,i)=>i===bidx?{...b,result}:b)};const {error:updateError}=await supabase.from("workouts").update({plan:next as never}).eq("id",wid);if(updateError)throw updateError;setBlock(next.blocks[bidx]??null);await refresh();toast.success("Score saved");}catch(e){toast.error((e as Error).message);}finally{setSaving(false);}
+  }
   const [running, setRunning] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const startRef = useRef<number>(0);
@@ -81,7 +95,8 @@ function TimerPage() {
     if (st.phase === "done" && running) { setRunning(false); beep(1200, 0.8); }
   }, [st.phase, st.round, st.remaining, running]);
 
-  const reset = () => { setRunning(false); setCountdown(null); baseRef.current = 0; setElapsed(0); lastKey.current = ""; };
+  useEffect(()=>{if(st.phase==="done"&&wid&&cfg.mode==="amrap"&&!savedRef.current){savedRef.current=true;saveScore();}},[st.phase]);
+  const reset = () => { savedRef.current=false; setRoundCount(0);setExtraReps(0); setRunning(false); setCountdown(null); baseRef.current = 0; setElapsed(0); lastKey.current = ""; };
   const pick = (m: TimerMode) => { reset(); setCfg(PRESETS[m]); };
   const total = totalDuration(cfg);
   const progress = total ? Math.min(1, st.totalElapsed / total) : 0;
@@ -93,10 +108,11 @@ function TimerPage() {
 
   return (
     <div className="space-y-5">
+      <p className="sr-only" aria-live="polite">{st.phase==="done"?"Finished":st.phase==="rest"?"Rest":running?`Work, round ${st.round} of ${cfg.rounds}`:"Stopped"}</p>
       <header><p className="eyebrow">Clock</p><h1 className="text-4xl">Timer</h1></header>
       <div className="-mx-1 overflow-x-auto px-1">
-        <Chips options={MODES.map((m) => m.label)} value={MODES.find((m) => m.key === cfg.mode)!.label}
-          onChange={(l: string) => pick(MODES.find((m) => m.label === l)!.key)} />
+        <Chips options={MODES.map((m) => m.label)} value={MODES.find((m) => m.key === cfg.mode)?.label ?? "EMOM"}
+          onChange={(l: string) => pick(MODES.find((m) => m.label === l)?.key ?? "emom")} />
       </div>
 
       <div className={`surface relative overflow-hidden p-8 text-center transition-colors ${signal}`}>
@@ -108,7 +124,7 @@ function TimerPage() {
         {(cfg.mode === "emom" || cfg.mode === "tabata" || cfg.mode === "intervals") && (
           <p className="mt-3 text-sm opacity-80">Round {Math.min(st.round, cfg.rounds)} of {cfg.rounds}</p>
         )}
-        {cfg.mode === "amrap" && <RoundCounter key={String(editable)} />}
+        {cfg.mode === "amrap" && <div className="mt-4 flex flex-wrap items-center justify-center gap-3"><Button variant="outline" className="h-11 bg-transparent text-current" onClick={()=>setRoundCount(roundCount+1)}>Rounds: {roundCount} · +1</Button><Input aria-label="Additional reps" type="number" min={0} value={extraReps} onChange={e=>setExtraReps(Math.max(0,Number(e.target.value)))} className="w-24 bg-transparent text-current"/></div>}
       </div>
 
       <div className="grid grid-cols-[1fr_auto] gap-3">
@@ -122,13 +138,15 @@ function TimerPage() {
         <Button variant="outline" size="xl" className="rounded-full" onClick={reset} aria-label="Reset"><RotateCcw /></Button>
       </div>
 
+      {wid&&<Button variant="outline" className="w-full" disabled={saving} onClick={saveScore}>Save score</Button>}
       {block && (
         <section className="surface p-5">
           <p className="eyebrow">{block.minutes} min · {block.format}</p>
           <h2 className="mt-1 text-2xl">{block.name}</h2>
+          {block.result&&<p className="mt-2">Score: {block.result}</p>}
           <ul className="mt-3 divide-y">
             {block.exercises.map((e, j) => (
-              <li key={j} className="flex items-baseline justify-between gap-3 py-2">
+              <li key={j} className="flex flex-wrap items-baseline justify-between gap-3 py-2">
                 <span className="min-w-0 font-medium">{e.name}</span>
                 <span className="shrink-0 text-sm text-clay">{e.prescription}</span>
               </li>
@@ -164,19 +182,10 @@ function Stepper({ label, value, onChange, min, max, step = 1 }: { label: string
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
       <span className="text-sm">{label}</span>
       <div className="flex items-center gap-2">
-        <button className="chip h-10 w-10 !p-0" onClick={() => onChange(Math.max(min, value - step))}>−</button>
+        <Button variant="outline" size="icon" className="h-11 w-11" aria-label={`Decrease ${label}`} onClick={() => onChange(Math.max(min, value - step))}>−</Button>
         <span className="w-12 text-center font-display text-2xl tabular-nums">{value}</span>
-        <button className="chip h-10 w-10 !p-0" onClick={() => onChange(Math.min(max, value + step))}>+</button>
+        <Button variant="outline" size="icon" className="h-11 w-11" aria-label={`Increase ${label}`} onClick={() => onChange(Math.min(max, value + step))}>+</Button>
       </div>
     </div>
-  );
-}
-
-function RoundCounter() {
-  const [n, setN] = useState(0);
-  return (
-    <button className="mt-4 rounded-full border border-sand/40 px-5 py-2 text-sm" onClick={() => setN(n + 1)}>
-      Rounds: <span className="font-display text-xl">{n}</span> · tap +1
-    </button>
   );
 }

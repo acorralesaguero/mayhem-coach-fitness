@@ -1,6 +1,10 @@
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { CalendarDays, Flame, LineChart, Timer, User } from "lucide-react";
+import { useProfile } from "@/lib/data";
+import { PageSkeleton } from "@/components/PageSkeleton";
+import { InstallPrompt } from "@/components/InstallPrompt";
+import { Consent } from "@/components/Consent";
 import { useAuth } from "@/lib/use-auth";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -19,18 +23,17 @@ const NAV = [
 function Layout() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
+  const { data: profile } = useProfile();
   useEffect(() => {
-    if (!loading && !session) navigate({ to: "/auth" });
+    if (!loading && !session) navigate({ to: "/auth", search: {mode: "signin", redirect: window.location.pathname} });
   }, [loading, session, navigate]);
 
-  if (loading || !session) {
-    return <div className="flex min-h-[100dvh] items-center justify-center text-muted-foreground">Loading…</div>;
-  }
 
   return (
     <div className="min-h-[100dvh] pb-24">
+      {session && <InstallPrompt/>}
       <div className="mx-auto max-w-xl px-5 pt-6">
-        <Outlet />
+        {loading || !session || !profile ? <PageSkeleton /> : !profile.terms_accepted_at ? <Consent /> : <Outlet />}
       </div>
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
         <div className="mx-auto grid max-w-xl grid-cols-5">
