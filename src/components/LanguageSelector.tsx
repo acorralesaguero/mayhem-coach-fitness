@@ -1,5 +1,5 @@
 import { Languages } from "lucide-react";
-import { useTranslation, type Language } from "@/lib/i18n";
+import { useTranslation } from "@/lib/i18n";
 export function LanguageSelector() {
   const { language, setLanguage } = useTranslation();
   return (
@@ -10,8 +10,8 @@ export function LanguageSelector() {
         <select
           aria-label={language === "es" ? "Idioma" : "Language"}
           value={language}
-          onChange={(e) => setLanguage(e.target.value as Language)}
-          className="min-h-9 rounded border border-input bg-background px-2 text-foreground"
+          onChange={(e) => setLanguage(e.target.value === "es" ? "es" : "en")}
+          className="min-h-11 rounded border border-input bg-background px-2 text-foreground"
         >
           <option value="en">English</option>
           <option value="es">Español</option>

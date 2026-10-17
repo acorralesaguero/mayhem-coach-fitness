@@ -1,5 +1,12 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { spanish } from "./spanish";
+const translationPattern = new RegExp(
+  `(?<![\\p{L}])(?:${Object.keys(spanish)
+    .sort((a, b) => b.length - a.length)
+    .map((key) => key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    .join("|")})(?![\\p{L}])`,
+  "gu",
+);
 export type Language = "en" | "es";
 const LanguageContext = createContext<{
   language: Language;
@@ -9,18 +16,12 @@ export function translate<T>(value: T, language: Language): T {
   if (language !== "es" || typeof value !== "string") return value;
   const exact = spanish[value.trim()];
   if (exact) return value.replace(value.trim(), exact) as T;
-  const ready=value.match(/^(.+?) phase, (.+?)\. Readiness is down today, so loads are trimmed (\d+)%\. Same session as everyone else — just smarter weights\.$/);
-  if(ready)return `${translate(ready[1],language)}: ${translate(ready[2],language)}. Tu preparación es menor hoy, así que reducimos las cargas un ${ready[3]}%. La misma sesión, con cargas adaptadas a ti.` as T;
-  let result = value;
-  const keys = Object.keys(spanish).sort((a, b) => b.length - a.length);
-  for (const key of keys) {
-    if (key.length < 3) continue;
-    result = result.replace(
-      new RegExp(`(?<![\\p{L}])${key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\p{L}])`, "gu"),
-      () => spanish[key] ?? key,
-    );
-  }
-  return result as T;
+  const ready = value.match(
+    /^(.+?) phase, (.+?)\. Readiness is down today, so loads are trimmed (\d+)%\. Same session as everyone else — just smarter weights\.$/,
+  );
+  if (ready)
+    return `${translate(ready[1], language)}: ${translate(ready[2], language)}. Tu preparación es menor hoy, así que reducimos las cargas un ${ready[3]}%. La misma sesión, con cargas adaptadas a ti.` as T;
+  return value.replace(translationPattern, (match) => spanish[match] ?? match) as T;
 }
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>("en");
