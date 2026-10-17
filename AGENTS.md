@@ -23,4 +23,4 @@
 - Public sample uses presentational WorkoutBlocks and expiring browser storage, while account operations use authenticated server functions — keeps public display free of privileged access.
 - Service worker caches only allowlisted static files, never navigations or authenticated requests — prevents offline disclosure of account data.
 
-- LanguageProvider stores an explicit English/Spanish browser preference; translate only displayed labels and keep canonical English equipment, exercise and profile values unchanged — language switching must not affect training logic.
+- LanguageProvider honors an explicit browser preference before browser-language detection and supplies a shared locale; translate only displayed labels, notifications and chart names, not stored equipment, exercise, profile or user-authored values — both languages share training logic and state.

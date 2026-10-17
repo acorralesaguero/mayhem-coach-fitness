@@ -8,6 +8,11 @@ const translationPattern = new RegExp(
   "gu",
 );
 export type Language = "en" | "es";
+export const languageLocale = (language: Language) => language === "es" ? "es-419" : "en-US";
+export function resolveLanguage(saved: string | null, browserLanguages: readonly string[]): Language {
+  if (saved === "en" || saved === "es") return saved;
+  return browserLanguages[0]?.toLowerCase().split("-")[0] === "es" ? "es" : "en";
+}
 const LanguageContext = createContext<{
   language: Language;
   setLanguage: (language: Language) => void;
@@ -31,12 +36,14 @@ export function translate<T>(value: T, language: Language): T {
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>("en");
   useEffect(() => {
+    let saved: string | null = null;
     try {
-      if (localStorage.getItem("forge:language") === "es") setLanguage("es");
+      saved = localStorage.getItem("forge:language");
     } catch {}
+    setLanguage(resolveLanguage(saved, navigator.languages));
   }, []);
   useEffect(() => {
-    document.documentElement.lang = language;
+    document.documentElement.lang = languageLocale(language);
   }, [language]);
   function select(next: Language) {
     setLanguage(next);
@@ -52,5 +59,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 }
 export function useTranslation() {
   const context = useContext(LanguageContext);
-  return { ...context, t: <T,>(value: T) => translate(value, context.language) };
+  return {
+    ...context,
+    locale: languageLocale(context.language),
+    t: <T,>(value: T) => translate(value, context.language),
+    tError: (message: string) => context.language === "es"
+      ? spanish[message.trim()] ?? spanish["Something went wrong. Please try again."] ?? message
+      : message,
+  };
 }
