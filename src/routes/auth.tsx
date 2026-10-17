@@ -22,7 +22,7 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 function AuthPage() {
-  const { t } = useTranslation();
+  const { t, tError } = useTranslation();
   const search = Route.useSearch();
   const [mode, setMode] = useState<"signin" | "signup">(search.mode ?? "signup"),
     [email, setEmail] = useState(""),
@@ -63,7 +63,7 @@ function AuthPage() {
         if (error) throw error;
       }
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(tError((e as Error).message));
     } finally {
       setBusy(false);
     }
@@ -77,17 +77,17 @@ function AuthPage() {
       options: { emailRedirectTo },
     });
     setBusy(false);
-    if (error) toast.error(error.message);
+    if (error) toast.error(tError(error.message));
     else {
       setCooldown(30);
-      toast.success("Confirmation email sent");
+      toast.success(t("Confirmation email sent"));
     }
   }
   async function google() {
     const r = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
-    if (r.error) toast.error("Google sign-in failed");
+    if (r.error) toast.error(t("Google sign-in failed"));
   }
   return (
     <main className="mx-auto flex min-h-[100dvh] max-w-sm flex-col justify-center px-6 py-10">
@@ -100,7 +100,7 @@ function AuthPage() {
             <h1 className="mt-8 text-4xl">{t("Check your email")}</h1>
             <p className="mt-3 break-words">
               {t("We sent a confirmation link to ")}
-              {t(email)}
+              {email}
               {t(".")}
             </p>
             <Button className="mt-7" variant="ink" disabled={busy || cooldown > 0} onClick={resend}>

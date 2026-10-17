@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/profile")({
   component: ProfilePage,
 });
 function ProfilePage() {
-  const { t } = useTranslation();
+  const { t, tError } = useTranslation();
   const { data: profile, error } = useProfile(),
     refresh = useRefresh();
   const [p, setP] = useState<Profile | null>(null),
@@ -41,9 +41,9 @@ function ProfilePage() {
     setBusy(true);
     const { error } = await supabase.from("profiles").update(p).eq("id", p.id);
     setBusy(false);
-    if (error) toast.error(error.message);
+    if (error) toast.error(tError(error.message));
     else {
-      toast.success("Profile saved");
+      toast.success(t("Profile saved"));
       await refresh();
     }
   }
@@ -80,7 +80,7 @@ function ProfilePage() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(tError((e as Error).message));
     } finally {
       setBusy(false);
     }
@@ -183,7 +183,7 @@ function ProfilePage() {
                     await supabase.auth.signOut();
                     window.location.assign("/");
                   } catch (e) {
-                    toast.error((e as Error).message);
+                    toast.error(tError((e as Error).message));
                     setBusy(false);
                   }
                 }}
