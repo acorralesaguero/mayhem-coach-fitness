@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { CalendarDays, Flame, LineChart, Timer, User } from "lucide-react";
 import { useProfile } from "@/lib/data";
 import { PageSkeleton } from "@/components/PageSkeleton";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import { Consent } from "@/components/Consent";
 import { useAuth } from "@/lib/use-auth";
 
@@ -30,6 +31,7 @@ function Layout() {
 
   return (
     <div className="min-h-[100dvh] pb-24">
+      {session && <InstallPrompt/>}
       <div className="mx-auto max-w-xl px-5 pt-6">
         {loading || !session || !profile ? <PageSkeleton /> : !profile.terms_accepted_at ? <Consent /> : <Outlet />}
       </div>

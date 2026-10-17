@@ -9,6 +9,17 @@ import {
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import "@fontsource/cormorant-garamond/500.css";
+import "@fontsource/cormorant-garamond/600.css";
+import "@fontsource/cormorant-garamond/500-italic.css";
+import "@fontsource/manrope/400.css";
+import "@fontsource/manrope/500.css";
+import "@fontsource/manrope/600.css";
+import "@fontsource/manrope/700.css";
+import displayFont from "@fontsource/cormorant-garamond/files/cormorant-garamond-latin-500-normal.woff2?url";
+import bodyFont from "@fontsource/manrope/files/manrope-latin-400-normal.woff2?url";
+import { BRAND,SITE_URL } from "@/lib/brand";
+import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
@@ -59,20 +70,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "Forge — Hybrid Athlete Coach" },
-      { name: "description", content: "AI coach for functional fitness: 30, 60 and 90 minute sessions built around your week and readiness." },
+      { title: `${BRAND.name} — ${BRAND.tagline}` },
+      { name: "description", content: "Fixed functional-fitness sessions adapted to your week and readiness." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "theme-color", content: "#33312e" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.png", type: "image/png" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap",
-      },
+      {rel:"preload",href:displayFont,as:"font",type:"font/woff2",crossOrigin:"anonymous"},
+      {rel:"preload",href:bodyFont,as:"font",type:"font/woff2",crossOrigin:"anonymous"},
+      {rel:"manifest",href:"/manifest.webmanifest"},
+      {rel:"apple-touch-icon",href:"/icon-180.png"},
     ],
   }),
   shellComponent: RootShell,
@@ -97,6 +107,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router=useRouter();
+  useEffect(()=>{const {data}=supabase.auth.onAuthStateChange(event=>{if(!["SIGNED_IN","SIGNED_OUT","USER_UPDATED"].includes(event))return;router.invalidate();if(event==="SIGNED_OUT")queryClient.clear();else queryClient.invalidateQueries();});return()=>data.subscription.unsubscribe();},[router,queryClient]);
+  useEffect(()=>{if(window.location.hostname===new URL(SITE_URL).hostname&&window.self===window.top&&"serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});},[]);
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
