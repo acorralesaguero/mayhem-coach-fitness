@@ -54,6 +54,7 @@ export const adjustWorkout = createServerFn({ method: "POST" })
     z
       .object({
         workoutId: z.string().uuid(),
+        language: z.enum(["en", "es"]).default("en"),
         message: z
           .string()
           .transform((s) =>
@@ -96,7 +97,7 @@ export const adjustWorkout = createServerFn({ method: "POST" })
       output: Output.object({ schema }),
       system:
         "You are a functional fitness coach. The athlete has a fixed session. Change ONLY the exercises affected by their note (equipment, space, injury, broken machine), keeping the same stimulus, reps, time domain, avoiding advanced movements for beginners and keeping loads conservative, and number of blocks and exercises in the same order. For changed exercises set swapped_from to the original name, else null. coach_note: one sentence on what changed.",
-      prompt: `Experience: ${profile?.experience ?? "Beginner"}. Available equipment: ${JSON.stringify(profile?.equipment ?? [])}. Note: ${data.message}\n\nSession blocks:\n${JSON.stringify(plan.blocks.map((b) => ({ name: b.name, exercises: b.exercises.map(({ actual: _a, ...e }) => e) })))}`,
+      prompt: `Write coach_note in ${data.language === "es" ? "Spanish" : "English"}. Keep exercise names, prescriptions and swapped_from in English for equipment matching. Interpret the athlete note in either English or Spanish. Experience: ${profile?.experience ?? "Beginner"}. Available equipment: ${JSON.stringify(profile?.equipment ?? [])}. Note: ${data.message}\n\nSession blocks:\n${JSON.stringify(plan.blocks.map((b) => ({ name: b.name, exercises: b.exercises.map(({ actual: _a, ...e }) => e) })))}`,
       providerOptions: {
         openai: {
           forceReasoning: true,

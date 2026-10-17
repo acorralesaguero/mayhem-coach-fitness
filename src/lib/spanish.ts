@@ -571,3 +571,11 @@ Object.assign(spanish, {
   "Exercise safety, eligibility and service terms for Forge.":
     "Seguridad del ejercicio, requisitos y términos de Forge.",
 });
+
+Object.assign(spanish, {
+  cap: "límite",
+  "Readiness, weekly training and your lift progress.":
+    "Preparación, entrenamiento semanal y progreso de tus levantamientos.",
+  "Same load all sets; leave 1–2 reps in the tank":
+    "La misma carga en todas las series; deja 1–2 repeticiones en reserva",
+});

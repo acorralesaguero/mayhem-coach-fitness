@@ -16,6 +16,11 @@ export function translate<T>(value: T, language: Language): T {
   if (language !== "es" || typeof value !== "string") return value;
   const exact = spanish[value.trim()];
   if (exact) return value.replace(value.trim(), exact) as T;
+  const pattern = value.match(
+    /^In your last (\d+) check-ins, energy averaged ([\d.]+) after 7h\+ sleep and ([\d.]+) after less \(n=(\d+) vs n=(\d+)\)$/,
+  );
+  if (pattern)
+    return `En tus últimos ${pattern[1]} registros, tu energía media fue ${pattern[2]} después de dormir 7 horas o más y ${pattern[3]} con menos sueño (n=${pattern[4]} frente a n=${pattern[5]}).` as T;
   const ready = value.match(
     /^(.+?) phase, (.+?)\. Readiness is down today, so loads are trimmed (\d+)%\. Same session as everyone else — just smarter weights\.$/,
   );

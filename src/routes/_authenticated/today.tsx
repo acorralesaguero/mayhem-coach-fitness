@@ -43,7 +43,7 @@ export const Route = createFileRoute("/_authenticated/today")({
   component: TodayPage,
 });
 function TodayPage() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { data: profile, error: profileError } = useProfile(),
     { data: week } = useWeekPlan(),
     { data: workout, isPending } = useTodayWorkout(),
@@ -101,6 +101,7 @@ function TodayPage() {
               await adjust({
                 data: {
                   workoutId: id,
+                  language,
                   message: ("Standing limitations: " + profile.limitations).slice(0, 500),
                 },
               });
@@ -128,7 +129,12 @@ function TodayPage() {
           {t(DAYS[new Date().getDay()])}
           {t(" ·")}
           {t(" ")}
-          {t(new Date().toLocaleDateString(undefined, { month: "long", day: "numeric" }))}
+          {t(
+            new Date().toLocaleDateString(language === "es" ? "es" : "en", {
+              month: "long",
+              day: "numeric",
+            }),
+          )}
         </p>
         <h1 className="mt-2 text-4xl">
           {t(workout ? workout.title : `Morning, ${profile.display_name || "athlete"}.`)}
@@ -172,7 +178,7 @@ function CheckIn({
   recentTitles: string[];
   onDone: () => Promise<void>;
 }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [duration, setDuration] = useState<30 | 60 | 90>(
       initialDuration === 30 ? 30 : initialDuration === 90 ? 90 : 60,
     ),
@@ -225,7 +231,7 @@ function CheckIn({
           .slice(0, 500);
         if (message.length >= 2)
           try {
-            await adjust({ data: { workoutId: id, message } });
+            await adjust({ data: { workoutId: id, language, message } });
           } catch {
             toast.error(
               "Couldn't apply your limitations automatically — use 'Ask your coach to adjust'.",
@@ -345,7 +351,7 @@ function WorkoutView({
   week: Database["public"]["Tables"]["week_plan"]["Row"][];
   onChange: () => Promise<void>;
 }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const initial = w.plan as unknown as WorkoutPlan;
   const [plan, setPlan] = useState(initial),
     [rpe, setRpe] = useState(w.rpe ?? 7),
@@ -379,7 +385,7 @@ function WorkoutView({
     if (note.trim().length < 2) return;
     setBusy(true);
     try {
-      await adjust({ data: { workoutId: w.id, message: note.trim() } });
+      await adjust({ data: { workoutId: w.id, language, message: note.trim() } });
       setNote("");
       await onChange();
       toast.success("Session adjusted");
