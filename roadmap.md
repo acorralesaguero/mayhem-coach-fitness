@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Language switcher as a compact EN/ES segmented control beside the sign-in button and in account screen headers
 - [x] Adapt Spanish for Latin America; verify sample workout/input parity, canonical save, remembered switching and public pages (signed-in checks remain blocked below)
 - [x] Add English/Spanish selection, translate public and signed-in screens and workout display, verify switching and persistence
 - [x] Complete missing prerequisites and safe data ownership for the six uploaded briefs

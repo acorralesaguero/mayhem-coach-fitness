@@ -24,3 +24,4 @@
 - Service worker caches only allowlisted static files, never navigations or authenticated requests — prevents offline disclosure of account data.
 
 - LanguageProvider honors an explicit browser preference before browser-language detection and supplies a shared locale; translate only displayed labels, notifications and chart names, not stored equipment, exercise, profile or user-authored values — both languages share training logic and state.
+- Language switching is one compact EN/ES segmented control rendered in each screen's header row (start page beside the sign-in button, account screens in the layout header), never a full-width bar — keeps the switch reachable without displacing content.
