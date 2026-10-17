@@ -36,7 +36,7 @@ describe("Forge rules", () => {
       coach_note: "",
       intensity: "moderate" as const,
       cooldown: "",
-      blocks: [{ name: "x", format: "AMRAP", minutes: 10, exercises: [e, { ...e, name: "Run" }] }],
+      blocks: [{ name: "x", format: "AMRAP", minutes: 10, exercises: [{...e,swapped_from:undefined}, { ...e, name: "Run",swapped_from:undefined }] }],
     };
     expect(() =>
       validateAdjustment({ coach_note: "x", blocks: [{ exercises: [e] }] }, plan),
@@ -49,7 +49,7 @@ describe("Forge rules", () => {
     ).toThrow();
     expect(
       validateAdjustment(
-        { coach_note: "x", blocks: [{ exercises: [e, { ...e, name: "Run" }] }] },
+        { coach_note: "x", blocks: [{ exercises: [{...e,swapped_from:undefined}, { ...e, name: "Run",swapped_from:undefined }] }] },
         plan,
       ).blocks,
     ).toHaveLength(1);
