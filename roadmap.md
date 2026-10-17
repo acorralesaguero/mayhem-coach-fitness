@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Add English/Spanish selection, translate public and signed-in screens and workout display, verify switching and persistence
 - [x] Complete missing prerequisites and safe data ownership for the six uploaded briefs
 - [x] Profile-driven workout library, equipment and beginner substitutions, no-repeat selection
 - [x] Landing rebuild and no-account sample session
