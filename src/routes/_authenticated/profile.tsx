@@ -1,93 +1,20 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute,Link } from "@tanstack/react-router";
+import { useState,useEffect } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { pageHead } from "@/lib/brand";
+import { useProfile,useRefresh } from "@/lib/data";
+import { deleteAccount } from "@/lib/account.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/use-auth";
-import { Chips, Section } from "@/components/Chips";
+import { parseNumeric } from "@/lib/progress";
+import { LIFT_LABELS } from "@/lib/program";
+import { Chips,Section } from "@/components/Chips";
+import { PageSkeleton } from "@/components/PageSkeleton";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { LIFT_LABELS, type Lift } from "@/lib/program";
-
-const BENCH: (Lift | "bodyweight" | "max_pullups" | "max_pushups")[] = ["bodyweight", "back_squat", "front_squat", "deadlift", "strict_press", "push_press", "clean_jerk", "snatch", "max_pullups", "max_pushups"];
-const BLABEL: Record<string, string> = { ...LIFT_LABELS, bodyweight: "Bodyweight", max_pullups: "Max pull-ups (reps)", max_pushups: "Max push-ups (reps)" };
-import { BODY_TYPES, BUILD_FOCUS, DURATIONS, EQUIPMENT, EXPERIENCE, GOALS, PROGRESSION, TARGET_PHYSIQUES } from "@/lib/options";
-
-export const Route = createFileRoute("/_authenticated/profile")({
-  head: () => ({ meta: [{ title: "Athlete profile — Forge" }, { name: "description", content: "Your body type, goals and progression style." }] }),
-  component: ProfilePage,
-});
-
-type P = {
-  current_body_type: string | null; target_physique: string | null; primary_goal: string | null;
-  build_focus: string[]; progression_style: string | null; experience: string | null;
-  default_duration: number; equipment: string[]; limitations: string | null;
-  units: string; [k: string]: unknown;
-};
-
-function ProfilePage() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [p, setP] = useState<P | null>(null);
-  const [onboarded, setOnboarded] = useState(true);
-
-  useEffect(() => {
-    if (!user) return;
-    supabase.from("profiles").select("*").eq("id", user.id).maybeSingle().then(({ data }) => {
-      setOnboarded(!!data?.onboarded);
-      setP({
-        current_body_type: data?.current_body_type ?? null, target_physique: data?.target_physique ?? null,
-        primary_goal: data?.primary_goal ?? null, build_focus: data?.build_focus ?? [],
-        progression_style: data?.progression_style ?? null, experience: data?.experience ?? null,
-        default_duration: data?.default_duration ?? 60, equipment: data?.equipment ?? [], limitations: data?.limitations ?? "", units: data?.units ?? "lb",
-        ...Object.fromEntries(BENCH.map((k) => [k, (data as Record<string, unknown> | null)?.[k] ?? null])),
-      });
-    });
-  }, [user]);
-
-  if (!p || !user) return <p className="text-muted-foreground">Loading…</p>;
-  const set = <K extends keyof P>(k: K) => (v: P[K]) => setP({ ...p, [k]: v });
-
-  async function save() {
-    const { error } = await supabase.from("profiles").upsert({ id: user!.id, ...(p as object), onboarded: true });
-    if (error) { toast.error(error.message); return; }
-    toast.success("Profile saved");
-    if (!onboarded) navigate({ to: "/week" });
-  }
-
-  return (
-    <div className="space-y-4">
-      <header className="flex items-end justify-between">
-        <div>
-          <p className="eyebrow">Athlete profile</p>
-          <h1 className="text-4xl">{onboarded ? "Your blueprint" : "Let's build your blueprint"}</h1>
-        </div>
-        <button className="text-xs text-muted-foreground" onClick={() => supabase.auth.signOut()}>Sign out</button>
-      </header>
-      <Section title="Current body type"><Chips options={BODY_TYPES} value={p.current_body_type} onChange={set("current_body_type")} /></Section>
-      <Section title="Physique you're chasing"><Chips options={TARGET_PHYSIQUES} value={p.target_physique} onChange={set("target_physique")} /></Section>
-      <Section title="Primary goal"><Chips options={GOALS} value={p.primary_goal} onChange={set("primary_goal")} /></Section>
-      <Section title="What you want to build"><Chips multi options={BUILD_FOCUS} value={p.build_focus} onChange={set("build_focus")} /></Section>
-      <Section title="How you want to progress"><Chips options={PROGRESSION} value={p.progression_style} onChange={set("progression_style")} /></Section>
-      <Section title="Experience"><Chips options={EXPERIENCE} value={p.experience} onChange={set("experience")} /></Section>
-      <Section title="Usual session length (min)"><Chips options={DURATIONS} value={p.default_duration} onChange={set("default_duration")} /></Section>
-      <Section title="Equipment available"><Chips multi options={EQUIPMENT} value={p.equipment} onChange={set("equipment")} /></Section>
-      <Section title="Benchmarks (1-rep max)">
-        <p className="mb-3 text-xs text-muted-foreground">Workouts are fixed — your weights are calculated from these. Leave blank to use standard Rx loads.</p>
-        <Chips options={["lb", "kg"]} value={p.units} onChange={(v) => setP({ ...p, units: v as string })} />
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          {BENCH.map((k) => (
-            <label key={k} className="text-xs text-muted-foreground">{BLABEL[k]}
-              <Input inputMode="decimal" className="mt-1 h-11" value={(p[k] as number | null) ?? ""}
-                onChange={(e) => setP({ ...p, [k]: e.target.value === "" ? null : Number(e.target.value) })} />
-            </label>
-          ))}
-        </div>
-      </Section>
-      <Section title="Injuries or limitations">
-        <Textarea value={p.limitations ?? ""} onChange={(e) => set("limitations")(e.target.value)} placeholder="e.g. tight left shoulder, no running" />
-      </Section>
-      <Button variant="ink" size="xl" className="w-full" onClick={save}>{onboarded ? "Save" : "Continue to my week"}</Button>
-    </div>
-  );
-}
+import { DURATIONS,EQUIPMENT,EXPERIENCE,GOALS } from "@/lib/options";
+import type { Database } from "@/integrations/supabase/types";
+type Profile=Database['public']['Tables']['profiles']['Row'];
+export const Route=createFileRoute("/_authenticated/profile")({head:()=>pageHead("Athlete profile","Equipment, goals, benchmarks and account controls."),component:ProfilePage});
+function ProfilePage(){const {data:profile,error}=useProfile(),refresh=useRefresh();const [p,setP]=useState<Profile|null>(null),[confirmation,setConfirmation]=useState(""),[deleting,setDeleting]=useState(false),[busy,setBusy]=useState(false);const remove=useServerFn(deleteAccount);useEffect(()=>{if(profile)setP(profile);},[profile]);if(error)return <p role="alert">Your profile could not load. Please try again.</p>;if(!p)return <PageSkeleton/>;const set=(key:keyof Profile,value:unknown)=>setP({...p,[key]:value});async function save(){if(!p)return;setBusy(true);const {error}=await supabase.from("profiles").update(p).eq("id",p.id);setBusy(false);if(error)toast.error(error.message);else{toast.success("Profile saved");await refresh();}}async function exportData(){if(!p)return;setBusy(true);try{const [week,checkins,workouts]=await Promise.all([supabase.from("week_plan").select("*").eq("user_id",p.id),supabase.from("checkins").select("*").eq("user_id",p.id),supabase.from("workouts").select("*").eq("user_id",p.id)]);for(const q of [week,checkins,workouts])if(q.error)throw q.error;const url=URL.createObjectURL(new Blob([JSON.stringify({profile:p,week_plan:week.data,checkins:checkins.data,workouts:workouts.data},null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download="forge-data.json";a.click();URL.revokeObjectURL(url);}catch(e){toast.error((e as Error).message);}finally{setBusy(false);}}return <div><header className="flex justify-between gap-3"><h1 className="text-4xl">Your blueprint</h1><Button variant="ghost" onClick={()=>supabase.auth.signOut()}>Sign out</Button></header><Section title="Primary goal"><Chips options={GOALS} value={p.primary_goal} onChange={v=>set("primary_goal",v)}/></Section><Section title="Experience"><Chips options={EXPERIENCE} value={p.experience} onChange={v=>set("experience",v)}/></Section><Section title="Usual minutes"><Chips options={DURATIONS} value={p.default_duration} onChange={v=>set("default_duration",v)}/></Section><Section title="Equipment"><Chips multi options={EQUIPMENT} value={p.equipment} onChange={v=>set("equipment",v)}/></Section><Section title="Benchmarks (1-rep max)"><Chips options={["lb","kg"]} value={p.units} onChange={v=>set("units",v)}/><div className="mt-4 grid grid-cols-2 gap-4">{Object.entries({...LIFT_LABELS,bodyweight:"Bodyweight",max_pullups:"Max pull-ups",max_pushups:"Max push-ups"}).map(([key,label])=><label key={key} className="text-sm">{label}<Input inputMode="decimal" aria-label={label} value={String(p[key as keyof Profile]??"")} className="mt-1 h-11" onChange={e=>set(key as keyof Profile,parseNumeric(e.target.value)??null)}/></label>)}</div></Section><Section title="Injuries or limitations"><Textarea maxLength={500} value={p.limitations??""} onChange={e=>set("limitations",e.target.value)}/><p className="mt-2 text-sm text-muted-foreground">Forge is not medical advice.</p></Section><Button variant="ink" size="xl" className="my-5 w-full" disabled={busy} onClick={save}>Save profile</Button><Section title="Your account"><Button variant="outline" className="w-full" onClick={exportData} disabled={busy}>Download my data</Button><Button variant="ghost" className="mt-3 w-full text-destructive" onClick={()=>setDeleting(!deleting)}>Delete my account</Button>{deleting&&<div className="mt-4 space-y-3"><p>Deleting your account permanently removes your profile and training history. Type DELETE to confirm.</p><Input aria-label="Deletion confirmation" value={confirmation} onChange={e=>setConfirmation(e.target.value)}/><Button variant="destructive" disabled={confirmation!=="DELETE"||busy} onClick={async()=>{setBusy(true);try{await remove({data:{confirmation:"DELETE"}});await supabase.auth.signOut();window.location.assign("/");}catch(e){toast.error((e as Error).message);setBusy(false);}}}>Permanently delete account</Button></div>}</Section><div className="my-5 flex gap-5 text-sm"><Link to="/privacy">Privacy</Link><Link to="/terms">Terms</Link></div></div>;}
