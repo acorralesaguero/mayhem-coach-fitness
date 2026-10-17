@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Complete Latin American Spanish across Profile, Week, Today, Timer and Insights; verify language switching without changing saved training data
+- [x] Complete Latin American Spanish across Profile, Week, Today, Timer and Insights; signed-in switching, unchanged profile values and timer controls verified (Today awaits exercise-clearance setup below)
 - [x] Language switcher as a compact EN/ES segmented control beside the sign-in button and in account screen headers
 - [x] Adapt Spanish for Latin America; verify sample workout/input parity, canonical save, remembered switching and public pages (signed-in checks remain blocked below)
 - [x] Add English/Spanish selection, translate public and signed-in screens and workout display, verify switching and persistence
