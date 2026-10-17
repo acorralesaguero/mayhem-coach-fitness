@@ -1,5 +1,6 @@
 // Independent fixed Forge programming; conservative draft for qualified coach review.
 import { PHASES, WAVE, METCONS, ACCESSORY, WARMUP, STRENGTH_OPTIONS, RECOVERY, equipmentFor, type Ex, type Focus } from "./library";
+export { LIFT_LABELS } from "./library";
 import { swapOptions } from "./swaps";
 export type Lift = "back_squat" | "front_squat" | "deadlift" | "strict_press" | "push_press" | "clean_jerk" | "snatch";
 export type Units = "lb" | "kg";
@@ -7,7 +8,7 @@ export type Benchmarks = Partial<Record<Lift, number | null>> & { units?: string
 export type Readiness = { energy: number; sleep_hours: number; sleep_quality: number | null; stress: number | null; soreness: number; motivation: number | null };
 export type Tier = "rx" | "scaled";
 
-export type PlanExercise = { name: string; prescription: string; rest: string; cue: string; lift?: Lift; requires?: string; actual?: { weight?: string; reps?: string; weight_num?: number; reps_num?: number }; swapped_from?: string };
+export type PlanExercise = { name: string; prescription: string; rest: string; cue: string; lift?: Lift | undefined; requires?: string | undefined; actual?: { weight?: string | undefined; reps?: string | undefined; weight_num?: number | undefined; reps_num?: number | undefined } | undefined; swapped_from?: string | undefined };
 export type WorkoutPlan = {
   title: string;
   coach_note: string;
@@ -65,6 +66,7 @@ export function buildSession(opts: { date: Date; duration: 30 | 60 | 90; groups:
   const units: Units = b.units === "kg" ? "kg" : "lb";
   const wk = weekIndex(date);
   const phase = PHASES[Math.floor(date.getMonth() / 3)] ?? PHASES[0];
+  if(!phase)throw new Error("Phase not found");
   const wave = WAVE[((wk % 4) + 4) % 4] ?? 0;
   const factor = readinessFactor(readiness);
   let focus = focusFor(opts.groups, date.getDay());
@@ -81,8 +83,8 @@ export function buildSession(opts: { date: Date; duration: 30 | 60 | 90; groups:
       blocks: [
         { name: "Warm-up", format: "Easy flow", minutes: warmMin, exercises: leastRecent(RECOVERY, opts.recentTitles ?? [], wk, x=>x.name).ex.map(rx) },
         { name: "Mobility & Zone 2", format: "Continuous, easy", minutes: flow, exercises: [
-          { name: "Bike / walk / swim", prescription: `${Math.round(flow * 0.6)} min easy`, rest: "", cue: "Could hold a conversation" },
-          { name: "Hip & T-spine circuit", prescription: `${Math.round(flow * 0.4)} min`, rest: "", cue: "Couch stretch, pigeon, thread the needle" }] },
+          adaptExercise({ name: "Easy bike", prescription: `${Math.round(flow * 0.6)} min easy`, rest: "", cue: "Could hold a conversation" },opts.equipment??[],opts.experience),
+          { name: "Hip & T-spine circuit", prescription: `${Math.round(flow * 0.4)} min`, rest: "", cue: "Couch stretch, pigeon, thread the needle", requires:"Bodyweight only" }] },
       ],
     };
   }

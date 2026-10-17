@@ -1,9 +1,9 @@
 import type { Lift } from "./program";
-export type Ex = { name: string; reps: string; lift?: Lift; pct?: number; rx?: [number, number]; cue: string; rest?: string; requires?: string };
+export type Ex = { name: string; reps: string; lift?: Lift | undefined; pct?: number | undefined; rx?: [number, number]; cue: string; rest?: string; requires?: string };
 export type Metcon = { name: string; format: string; minutes: number; ex: Ex[] };
 export type Focus = "lower" | "upper" | "engine" | "oly" | "full" | "recovery";
 
-const LIB_LIFT_LABELS: Record<Lift, string> = {
+export const LIFT_LABELS: Record<Lift, string> = {
   back_squat: "Back squat", front_squat: "Front squat", deadlift: "Deadlift", strict_press: "Strict press",
   push_press: "Push press", clean_jerk: "Clean & jerk", snatch: "Snatch",
 };
