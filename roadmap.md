@@ -1,19 +1,22 @@
 # Roadmap
-- [ ] Complete missing prerequisites and safe data ownership for the six uploaded briefs
-- [ ] Profile-driven workout library, equipment and beginner substitutions, no-repeat selection
-- [ ] Landing rebuild and no-account sample session
-- [ ] Signup/recovery, consent and three-step onboarding
-- [ ] Check-in validation, atomic workout save and automatic adjustment notes
-- [ ] Scores, structured logs, PR suggestions, streaks and completed summary
-- [ ] Insights charts and gated sleep/energy comparison
-- [ ] Privacy/terms, export/deletion, AI validation and repository hygiene
-- [ ] Shared data cache, accessibility, static-only PWA and install prompt
-- [ ] Verify public and signed-in flows and focused rule tests
+- [x] Complete missing prerequisites and safe data ownership for the six uploaded briefs
+- [x] Profile-driven workout library, equipment and beginner substitutions, no-repeat selection
+- [x] Landing rebuild and no-account sample session
+- [x] Signup/recovery, consent and three-step onboarding
+- [x] Check-in validation, atomic workout save and automatic adjustment notes
+- [x] Scores, structured logs, PR suggestions, streaks and completed summary
+- [x] Insights charts and gated sleep/energy comparison
+- [x] Privacy/terms, export/deletion, AI validation and repository hygiene
+- [x] Shared data cache, accessibility, static-only PWA and install prompt
+- [x] Verify public routes, generated sample, signup safeguards, safe redirect, consent gate and focused rule tests
+- [ ] Verify signed-in onboarding, logging, coach adjustment, timer score and completion — blocked by user age/terms consent and exercise-clearance acknowledgement
+- [ ] Verify hosted email delivery/recovery and production PWA installation — requires user email confirmation and deployment
+- [ ] Qualified legal and programming review — requires legal adviser and coach
 - [ ] Deferred: analytics and coach usage limits (user chose to postpone)
 - [x] Gender-neutral start screen and block-style Forge logo with matching app icon
 - [x] Sign-in, profile/goals setup
 - [x] Weekly planner (training days + muscle groups)
-- [x] Daily coach check-in + AI workout (30/60/90)
+- [x] Daily check-in and fixed adaptive workouts (30/60/90)
 - [x] Insights history
 - [x] Mobile-first layout
 - [x] Workout timer: intervals, EMOM, AMRAP, Tabata, for time

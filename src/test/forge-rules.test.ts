@@ -49,7 +49,7 @@ describe("Forge rules", () => {
     ).toThrow();
     expect(
       validateAdjustment(
-        { coach_note: "x", blocks: [{ exercises: [{...e,swapped_from:undefined}, { ...e, name: "Run",swapped_from:undefined }] }] },
+        { coach_note: "x", blocks: [{ exercises: [e, { ...e, name: "Run" }] }] },
         plan,
       ).blocks,
     ).toHaveLength(1);
