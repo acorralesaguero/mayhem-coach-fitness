@@ -25,21 +25,31 @@ function Layout() {
   const navigate = useNavigate();
   const { data: profile } = useProfile();
   useEffect(() => {
-    if (!loading && !session) navigate({ to: "/auth", search: {mode: "signin", redirect: window.location.pathname} });
+    if (!loading && !session)
+      navigate({ to: "/auth", search: { mode: "signin", redirect: window.location.pathname } });
   }, [loading, session, navigate]);
-
 
   return (
     <div className="min-h-[100dvh] pb-24">
-      {session && <InstallPrompt/>}
+      {session && <InstallPrompt />}
       <div className="mx-auto max-w-xl px-5 pt-6">
-        {loading || !session || !profile ? <PageSkeleton /> : !profile.terms_accepted_at ? <Consent /> : <Outlet />}
+        {loading || !session || !profile ? (
+          <PageSkeleton />
+        ) : !profile.terms_accepted_at ? (
+          <Consent />
+        ) : (
+          <Outlet />
+        )}
       </div>
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
         <div className="mx-auto grid max-w-xl grid-cols-5">
           {NAV.map(({ to, label, icon: Icon }) => (
-            <Link key={to} to={to} className="flex flex-col items-center gap-1 py-3 text-[11px] text-muted-foreground"
-              activeProps={{ className: "!text-foreground" }}>
+            <Link
+              key={to}
+              to={to}
+              className="flex flex-col items-center gap-1 py-3 text-[11px] text-muted-foreground"
+              activeProps={{ className: "!text-foreground" }}
+            >
               <Icon className="h-5 w-5" />
               {label}
             </Link>
