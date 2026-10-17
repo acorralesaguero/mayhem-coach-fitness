@@ -85,3 +85,61 @@ export const WARMUP: Ex[] = [
   { name: "Movement prep with empty bar", reps: "2 rounds", cue: "Rehearse today's patterns" },
 ];
 
+
+// Independently authored, conservative draft sessions for coach review.
+const ex = (name: string, reps: string, lift?: Lift, pct?: number): Ex => ({ name, reps, lift, pct, cue: "Controlled technique; stop if painful" });
+const added: Record<Exclude<Focus, "recovery">, Metcon[]> = {
+ lower: [
+ { name:"Groundwork",format:"AMRAP 10",minutes:10,ex:[ex("Goblet squat","10"),ex("Reverse lunges","12"),ex("Plank","30 s")]},
+ { name:"Step & Settle",format:"EMOM 12",minutes:12,ex:[ex("Box step-ups","10"),ex("Air squats","12"),ex("Easy bike","40 s")]},
+ { name:"Lower Ladder",format:"For time · cap 15",minutes:15,ex:[ex("Front squats","15-12-9","front_squat",0.35),ex("Walking lunges","20-16-12"),ex("Sit-ups","15-12-9")]},
+ { name:"Steady Legs",format:"4 x 3 min on / 1 min off",minutes:16,ex:[ex("Kettlebell swings","12"),ex("Air squats","15"),ex("Run","100 m")]},
+ ],
+ upper:[
+ {name:"Push Pull Pace",format:"AMRAP 12",minutes:12,ex:[ex("Dumbbell push press","10"),ex("Ring rows","10"),ex("Sit-ups","12")]},
+ {name:"Upper Engine",format:"EMOM 15",minutes:15,ex:[ex("Strict press","8","strict_press",0.35),ex("Pull-ups","6"),ex("Row","40 s")]},
+ {name:"Press Path",format:"For time · cap 14",minutes:14,ex:[ex("Push-ups","30"),ex("Dumbbell rows","30"),ex("Dumbbell push press","30")]},
+ {name:"Shoulder Rhythm",format:"5 x 2 min on / 1 min off",minutes:15,ex:[ex("Push press","8","push_press",0.35),ex("Ring rows","10"),ex("Mountain climbers","20")]},
+ ],
+ engine:[
+ {name:"Easy Miles",format:"AMRAP 16",minutes:16,ex:[ex("Run","400 m"),ex("Burpees","6")]},
+ {name:"Engine Clock",format:"EMOM 15",minutes:15,ex:[ex("Row","45 s"),ex("Bike","45 s"),ex("Walk","45 s")]},
+ {name:"Pace Chipper",format:"For time · cap 20",minutes:20,ex:[ex("Row","1000 m"),ex("Run","800 m"),ex("Single-unders","100")]},
+ {name:"Cruise Intervals",format:"4 x 4 min on / 1 min off",minutes:20,ex:[ex("Bike","4 min comfortable")]},
+ ],
+ oly:[
+ {name:"Clean Rhythm",format:"EMOM 12",minutes:12,ex:[ex("Power cleans","3","clean_jerk",0.4),ex("Air squats","12"),ex("Walk","40 s")]},
+ {name:"Light & Fast",format:"AMRAP 10",minutes:10,ex:[ex("Power snatch","4","snatch",0.35),ex("Burpees","6")]},
+ {name:"Technique Chipper",format:"For time · cap 15",minutes:15,ex:[ex("Clean & jerk","20","clean_jerk",0.35),ex("Sit-ups","30"),ex("Run","400 m")]},
+ {name:"Power Windows",format:"4 x 2 min on / 1 min off",minutes:12,ex:[ex("Power cleans","5","clean_jerk",0.4),ex("Box step-ups","10")]},
+ ],
+ full:[
+ {name:"Everyday Athlete",format:"AMRAP 12",minutes:12,ex:[ex("Goblet squat","10"),ex("Push-ups","8"),ex("Run","200 m")]},
+ {name:"Full Circuit",format:"EMOM 15",minutes:15,ex:[ex("Deadlifts","8","deadlift",0.35),ex("Dumbbell push press","10"),ex("Row","40 s")]},
+ {name:"Whole Body Chipper",format:"For time · cap 18",minutes:18,ex:[ex("Walking lunges","40"),ex("Kettlebell swings","30"),ex("Push-ups","20"),ex("Burpees","10")]},
+ {name:"Balanced Intervals",format:"5 x 2 min on / 1 min off",minutes:15,ex:[ex("Front squats","6","front_squat",0.35),ex("Ring rows","8"),ex("Bike","30 s")]},
+ ],
+};
+for (const focus of Object.keys(added) as (keyof typeof added)[]) METCONS[focus].push(...added[focus]);
+export const STRENGTH_OPTIONS: Record<Exclude<Focus,"recovery"|"engine">, Ex[]> = {
+ lower:[ex("Back squat","", "back_squat"),ex("Front squat","","front_squat"),ex("Deadlift","","deadlift")],
+ upper:[ex("Strict press","","strict_press"),ex("Push press","","push_press"),ex("Weighted dumbbell row","")],
+ oly:[ex("Clean & jerk","","clean_jerk"),ex("Snatch","","snatch"),ex("Clean & jerk technique","","clean_jerk")],
+ full:[ex("Deadlift","","deadlift"),ex("Front squat","","front_squat"),ex("Push press","","push_press")],
+};
+export const RECOVERY = [
+ {name:"Restore & Walk",ex:[ex("Walk","Easy pace"),ex("Hip & T-spine circuit","Controlled flow")]},
+ {name:"Gentle Reset",ex:[ex("Easy bike","Conversational pace"),ex("Couch stretch","60 s/side"),ex("Box breathing","3 min")]},
+ {name:"Range & Rhythm",ex:[ex("Walk","Easy pace"),ex("Cat-cow","10 slow reps"),ex("Thread the needle","8/side")]},
+];
+export function equipmentFor(name: string): string {
+ if (/dumbbell|\bdb\b/i.test(name)) return "Dumbbells";
+ if (/kettlebell|goblet/i.test(name)) return "Kettlebells";
+ if (/ring|band|landmine|wall ball|box (jump|step)|sled|ghd|nordic|swim|skierg/i.test(name)) return "Full gym";
+ if (/pull.?up|toes.?to.?bar|hanging/i.test(name)) return "Pull-up bar";
+ if (/under|jump rope/i.test(name)) return "Jump rope";
+ if (/row|bike|cal row/i.test(name)) return "Rower / bike";
+ if (/bar|thruster|press|clean|snatch|deadlift|rdl|front squat|back squat|overhead squat|shoulder.to.overhead/i.test(name) && !/push.up|pike|single.leg/i.test(name)) return "Barbell & plates";
+ return "Bodyweight only";
+}
+for (const list of [...Object.values(METCONS).flat().map(m=>m.ex), ...Object.values(ACCESSORY), WARMUP, ...Object.values(STRENGTH_OPTIONS), ...RECOVERY.map(r=>r.ex)]) for(const movement of list) movement.requires=equipmentFor(movement.name);
