@@ -15,6 +15,7 @@ export type WorkoutPlan = {
   intensity: "recovery" | "moderate" | "hard" | "max";
   blocks: { name: string; format: string; minutes: number; result?: string; exercises: PlanExercise[] }[];
   cooldown: string;
+  limitations_applied?: string | undefined;
 };
 
 export function readinessScore(r: Readiness): number {
@@ -56,7 +57,7 @@ function loadFor(ex: Ex, b: Benchmarks, units: Units, factor: number, tier: Tier
   let w: number | null = null;
   if (oneRm && ex.pct) w = oneRm * (ex.pct + pctBoost) * factor;
   else if (ex.rx) { const base = units === "kg" ? ex.rx[0] * 0.4536 : ex.rx[0]; w = base * factor; }
-  if (w == null) return ex.reps;
+  if (w == null) return ex.requires && ex.requires !== "Bodyweight only" && /Dumbbells|Kettlebells|Barbell/.test(ex.requires) ? `${ex.reps} @ choose a load (RPE 7)` : ex.reps;
   if (tier === "scaled") w *= 0.7;
   return `${ex.reps} @ ${roundLoad(w, units)} ${units}`;
 }
@@ -129,6 +130,7 @@ export function adaptExercise(e: PlanExercise,equipment: string[],experience?: s
  let name=e.name;
  if(experience==="Beginner" && advanced(name)) name=/under/i.test(name)?"Single-unders (x3)":/toes/i.test(name)?"Hanging knee raise":/snatch/i.test(name)?"Kettlebell swing":"Dumbbell power clean";
  if(!compatible(name)) name=swapOptions(name).find(n=>compatible(n)&&!(experience==="Beginner"&&advanced(n))) ?? (/squat|lunge|jump|thruster/i.test(name)?"Air squat (tempo)":/deadlift|swing|clean|snatch/i.test(name)?"Hip thrust":/press|push/i.test(name)?"Incline push-up":/pull|row|hanging/i.test(name)?"Prone Y-T raise":"March in place");
+ if(/^(Bodyweight|Dumbbell|Kettlebell) version$/.test(name)) name=name==="Bodyweight version"?"March in place":name==="Dumbbell version"?"Dumbbell row":"Kettlebell deadlift";
  if(name===e.name) return {...e,requires:equipmentFor(name)};
  let prescription=e.prescription.split(" @ ")[0] ?? e.prescription;
  if(/Single-unders/.test(name)) prescription=prescription.replace(/\d+/g,n=>String(Number(n)*3));

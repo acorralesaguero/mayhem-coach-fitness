@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createOpenAI } from "@ai-sdk/openai";
 import { jsonSchema, Output, streamText } from "ai";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type { WorkoutPlan } from "@/lib/program";
+import { adaptExercise, type WorkoutPlan } from "@/lib/program";
 
 const exSchema: import("ai").JSONSchema7 = {
   type: "object", additionalProperties: false,
@@ -27,6 +27,7 @@ export const adjustWorkout = createServerFn({ method: "POST" })
     const { data: w, error } = await supabase.from("workouts").select("plan").eq("id", data.workoutId).eq("user_id",userId).single();
     if (error || !w) throw new Error("Workout not found");
     const plan = w.plan as unknown as WorkoutPlan;
+    const {data:profile}=await supabase.from("profiles").select("equipment,experience,limitations").eq("id",userId).single();
     const key = process.env["LOVABLE_API_KEY"];
     if (!key) throw new Error("Coach unavailable");
 
@@ -37,7 +38,7 @@ export const adjustWorkout = createServerFn({ method: "POST" })
       model: openai.responses("openai/gpt-6-astra"),
       output: Output.object({ schema }),
       system: "You are a functional fitness coach. The athlete has a fixed session. Change ONLY the exercises affected by their note (equipment, space, injury, broken machine), keeping the same stimulus, reps, time domain, avoiding advanced movements for beginners and keeping loads conservative, and number of blocks and exercises in the same order. For changed exercises set swapped_from to the original name, else null. coach_note: one sentence on what changed.",
-      prompt: `Note: ${data.message}\n\nSession blocks:\n${JSON.stringify(plan.blocks.map((b) => ({ name: b.name, exercises: b.exercises.map(({ actual: _a, ...e }) => e) })))}`,
+      prompt: `Experience: ${profile?.experience??"Beginner"}. Available equipment: ${JSON.stringify(profile?.equipment??[])}. Note: ${data.message}\n\nSession blocks:\n${JSON.stringify(plan.blocks.map((b) => ({ name: b.name, exercises: b.exercises.map(({ actual: _a, ...e }) => e) })))}`,
       providerOptions: { openai: { forceReasoning: true, reasoningEffort: "low", reasoningSummary: "auto", store: false, include: ["reasoning.encrypted_content"] } },
     });
     let raw;
@@ -51,7 +52,7 @@ export const adjustWorkout = createServerFn({ method: "POST" })
       if(!replacement||replacement.exercises.length!==b.exercises.length)throw new Error("Coach returned an invalid session — try rephrasing.");
       for(const [j,e] of b.exercises.entries()){const n=replacement.exercises[j];if(!n||(n.name!==e.name&&n.swapped_from!==e.name))throw new Error("Coach returned an invalid session — try rephrasing.");}
     }
-    const next:WorkoutPlan={...plan,coach_note:out.coach_note,blocks:plan.blocks.map((b,i)=>({...b,exercises:b.exercises.map((old,j)=>{const n=out.blocks[i]?.exercises[j];if(!n)return old;return {...old,...n,swapped_from:n.swapped_from??old.swapped_from,...(n.name!==old.name?{lift:undefined,actual:undefined}:{actual:old.actual})};})}))};
+    const next:WorkoutPlan={...plan,coach_note:out.coach_note,...(data.message.startsWith("Standing limitations:")?{limitations_applied:profile?.limitations??""}:{}),blocks:plan.blocks.map((b,i)=>({...b,exercises:b.exercises.map((old,j)=>{const n=out.blocks[i]?.exercises[j];if(!n)return old;if(n.name===old.name)return old;return adaptExercise({...old,...n,swapped_from:n.swapped_from??old.swapped_from,...(n.name!==old.name?{lift:undefined,actual:undefined}:{actual:old.actual})},profile?.equipment??[],profile?.experience);})}))};
     const { error: uErr } = await supabase.from("workouts").update({ plan: next as never }).eq("id", data.workoutId).eq("user_id",userId);
     if (uErr) throw new Error(uErr.message);
     return { ok: true };

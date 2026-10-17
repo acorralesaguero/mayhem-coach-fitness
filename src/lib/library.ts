@@ -134,7 +134,7 @@ export const RECOVERY = [
 ];
 export function equipmentFor(name: string): string {
  if (/dumbbell|\bdb\b/i.test(name)) return "Dumbbells";
- if (/kettlebell|goblet/i.test(name)) return "Kettlebells";
+ if (/kettlebell|goblet|farmer carry/i.test(name)) return "Kettlebells";
  if (/ring|band|landmine|wall ball|box (jump|step)|sled|ghd|nordic|swim|skierg/i.test(name)) return "Full gym";
  if (/pull.?up|toes.?to.?bar|hanging/i.test(name)) return "Pull-up bar";
  if (/under|jump rope/i.test(name)) return "Jump rope";
@@ -142,4 +142,4 @@ export function equipmentFor(name: string): string {
  if (/bar|thruster|press|clean|snatch|deadlift|rdl|front squat|back squat|overhead squat|shoulder.to.overhead/i.test(name) && !/push.up|pike|single.leg/i.test(name)) return "Barbell & plates";
  return "Bodyweight only";
 }
-for (const list of [...Object.values(METCONS).flat().map(m=>m.ex), ...Object.values(ACCESSORY), WARMUP, ...Object.values(STRENGTH_OPTIONS), ...RECOVERY.map(r=>r.ex)]) for(const movement of list) movement.requires=equipmentFor(movement.name);
+for (const list of [...Object.values(METCONS).flat().map(m=>m.ex), ...Object.values(ACCESSORY), WARMUP, ...Object.values(STRENGTH_OPTIONS), ...RECOVERY.map(r=>r.ex)]) for(const movement of list) {movement.requires=equipmentFor(movement.name); if(!movement.lift){const n=movement.name.toLowerCase();if(!/dumbbell|kettlebell|goblet|single-leg/.test(n)){if(/back squat/.test(n))movement.lift="back_squat";else if(/front squat/.test(n))movement.lift="front_squat";else if(/deadlift/.test(n))movement.lift="deadlift";else if(/strict press/.test(n))movement.lift="strict_press";else if(/push press|shoulder.to.overhead/.test(n))movement.lift="push_press";else if(/clean/.test(n))movement.lift="clean_jerk";else if(/snatch/.test(n))movement.lift="snatch";}}}
