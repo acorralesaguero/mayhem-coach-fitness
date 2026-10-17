@@ -22,7 +22,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedTimerRouteImport } from './routes/_authenticated/timer'
 import { Route as AuthenticatedTodayRouteImport } from './routes/_authenticated/today'
 import { Route as AuthenticatedWeekRouteImport } from './routes/_authenticated/week'
-import { Route as AuthForgotRouteImport } from './routes/auth.forgot'
+import { Route as AuthForgotRouteImport } from './routes/auth_.forgot'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -89,14 +89,14 @@ const AuthenticatedWeekRoute = AuthenticatedWeekRouteImport.update({
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthForgotRoute = AuthForgotRouteImport.update({
-  id: '/forgot',
-  path: '/forgot',
-  getParentRoute: () => AuthRoute,
+  id: '/auth_/forgot',
+  path: '/auth/forgot',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRouteWithChildren
+  '/auth': typeof AuthRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
@@ -111,7 +111,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRouteWithChildren
+  '/auth': typeof AuthRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
@@ -128,7 +128,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/auth': typeof AuthRouteWithChildren
+  '/auth': typeof AuthRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
@@ -139,7 +139,7 @@ export interface FileRoutesById {
   '/_authenticated/timer': typeof AuthenticatedTimerRoute
   '/_authenticated/today': typeof AuthenticatedTodayRoute
   '/_authenticated/week': typeof AuthenticatedWeekRoute
-  '/auth/forgot': typeof AuthForgotRoute
+  '/auth_/forgot': typeof AuthForgotRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -187,17 +187,18 @@ export interface FileRouteTypes {
     | '/_authenticated/timer'
     | '/_authenticated/today'
     | '/_authenticated/week'
-    | '/auth/forgot'
+    | '/auth_/forgot'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
-  AuthRoute: typeof AuthRouteWithChildren
+  AuthRoute: typeof AuthRoute
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   TermsRoute: typeof TermsRoute
   TryRoute: typeof TryRoute
+  AuthForgotRoute: typeof AuthForgotRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -293,12 +294,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWeekRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/auth/forgot': {
-      id: '/auth/forgot'
-      path: '/forgot'
+    '/auth_/forgot': {
+      id: '/auth_/forgot'
+      path: '/auth/forgot'
       fullPath: '/auth/forgot'
       preLoaderRoute: typeof AuthForgotRouteImport
-      parentRoute: typeof AuthRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -325,24 +326,15 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
-interface AuthRouteChildren {
-  AuthForgotRoute: typeof AuthForgotRoute
-}
-
-const AuthRouteChildren: AuthRouteChildren = {
-  AuthForgotRoute: AuthForgotRoute,
-}
-
-const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
-  AuthRoute: AuthRouteWithChildren,
+  AuthRoute: AuthRoute,
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   TermsRoute: TermsRoute,
   TryRoute: TryRoute,
+  AuthForgotRoute: AuthForgotRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
