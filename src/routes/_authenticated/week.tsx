@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/week")({
 type Day = { day_of_week: number; is_training: boolean; muscle_groups: string[]; duration: number };
 
 function WeekPage() {
-  const { t, tError } = useTranslation();
+  const { t, tx, tError } = useTranslation();
   const { user } = useAuth();
   const [days, setDays] = useState<Day[] | null>(null);
   const [open, setOpen] = useState<number | null>(new Date().getDay());
@@ -66,9 +66,7 @@ function WeekPage() {
         <p className="eyebrow">{t("Weekly program")}</p>
         <h1 className="text-4xl">{t("Shape your week")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {t(count)}
-          {t(" training ")}
-          {t(count === 1 ? "day" : "days")}
+          {tx(count === 1 ? "{count} training day" : "{count} training days", { count })}
           {t(" · tap a day to set its focus ")}
         </p>
       </header>
@@ -97,7 +95,7 @@ function WeekPage() {
                   </div>
                 </Button>
                 <Switch
-                  aria-label={t(`Train on ${DAYS[d.day_of_week]}`)}
+                  aria-label={tx("Train on {day}", { day: t(DAYS[d.day_of_week] ?? "") })}
                   checked={d.is_training}
                   onCheckedChange={(v) => {
                     update(d.day_of_week, { is_training: v });

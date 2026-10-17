@@ -33,6 +33,16 @@ export function translate<T>(value: T, language: Language): T {
     return `${translate(ready[1], language)}: ${translate(ready[2], language)}. Tu preparación es menor hoy, así que reducimos las cargas un ${ready[3]}%. La misma sesión, con cargas adaptadas a ti.` as T;
   return value.replace(translationPattern, (match) => spanish[match] ?? match) as T;
 }
+// Insert values after translation so names, notes and numeric training data stay intact.
+export function translateTemplate(
+  template: string,
+  values: Record<string, string | number>,
+  language: Language,
+): string {
+  return translate(template, language).replace(/\{(\w+)\}/g, (placeholder, key: string) =>
+    values[key] === undefined ? placeholder : String(values[key]),
+  );
+}
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>("en");
   useEffect(() => {
@@ -63,6 +73,8 @@ export function useTranslation() {
     ...context,
     locale: languageLocale(context.language),
     t: <T,>(value: T) => translate(value, context.language),
+    tx: (template: string, values: Record<string, string | number>) =>
+      translateTemplate(template, values, context.language),
     tError: (message: string) => context.language === "es"
       ? spanish[message.trim()] ?? spanish["Something went wrong. Please try again."] ?? message
       : message,

@@ -1,7 +1,21 @@
 import {describe,it,expect} from "vitest";
-import {translate,resolveLanguage,languageLocale} from "@/lib/i18n";
+import {translate,translateTemplate,resolveLanguage,languageLocale} from "@/lib/i18n";
 import {buildSession} from "@/lib/program";
 describe("language-independent training",()=>{
+ it("preserves user-authored names during language switching",()=>{
+  const name="Back Strength 60";
+  for(const language of ["en","es"] as const) {
+   expect(translateTemplate("Morning, {name}.",{name},language)).toContain(name);
+  }
+ });
+ it("keeps interpolated training values intact in both languages",()=>{
+  const values={round:3,rounds:10};
+  for(const language of ["en","es"] as const) {
+   const output=translateTemplate("Work, round {round} of {rounds}",values,language);
+   expect(output.match(/\d+/g)).toEqual(["3","10"]);
+  }
+  expect(values).toEqual({round:3,rounds:10});
+ });
  it("honors explicit switching over a Latin American browser language",()=>{
   expect(resolveLanguage("en",["es-HN"])).toBe("en");
   expect(resolveLanguage("es",["en-US"])).toBe("es");
