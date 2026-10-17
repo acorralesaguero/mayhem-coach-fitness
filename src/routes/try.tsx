@@ -6,6 +6,7 @@ import { buildSession, type WorkoutPlan } from "@/lib/program";
 import { Chips, Scale, Section } from "@/components/Chips";
 import { WorkoutBlocks } from "@/components/WorkoutBlocks";
 import { Button } from "@/components/ui/button";
+import { LanguageSelector } from "@/components/LanguageSelector";
 export const Route = createFileRoute("/try")({
   head: () =>
     pageHead(
@@ -57,9 +58,12 @@ function TryPage() {
   }
   return (
     <main className="mx-auto max-w-xl px-5 py-8">
-      <Link to="/" className="text-muted-foreground">
-        {t(" ← Home ")}
-      </Link>
+      <div className="flex items-center justify-between gap-3">
+        <Link to="/" className="text-muted-foreground">
+          {t(" ← Home ")}
+        </Link>
+        <LanguageSelector />
+      </div>
       <h1 className="mt-6 text-4xl">{t("Try your session")}</h1>
       <Section title={t("Minutes")}>
         <Chips options={[30, 60, 90]} value={duration} onChange={setDuration} />

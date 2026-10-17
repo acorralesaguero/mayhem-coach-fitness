@@ -1,5 +1,4 @@
 import { LanguageProvider, useTranslation } from "@/lib/i18n";
-import { LanguageSelector } from "@/components/LanguageSelector";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -145,7 +144,6 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <>
-        <LanguageSelector />
         <Outlet />
         <Toaster position="top-center" />
       </>
