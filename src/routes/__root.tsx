@@ -1,4 +1,4 @@
-import { LanguageProvider } from "@/lib/i18n";
+import { LanguageProvider, useTranslation } from "@/lib/i18n";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -23,22 +23,24 @@ import bodyFont from "@fontsource/manrope/files/manrope-latin-400-normal.woff2?u
 import { BRAND, SITE_URL } from "@/lib/brand";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { Button } from "@/components/ui/button";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
+  const { t } = useTranslation();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">{t("Page not found")}</h2>
         <div className="mt-6">
           <Link
             to="/"
             className="inline-flex rounded-full bg-primary px-5 py-2 text-sm text-primary-foreground"
           >
-            Go home
+            {t("Go home")}
           </Link>
         </div>
       </div>
@@ -47,6 +49,7 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
+  const { t } = useTranslation();
   console.error(error);
   const router = useRouter();
   useEffect(() => {
@@ -55,16 +58,16 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-2xl text-foreground">This page didn't load</h1>
-        <button
+        <h1 className="text-2xl text-foreground">{t("This page didn't load")}</h1>
+        <Button
           onClick={() => {
             router.invalidate();
             reset();
           }}
           className="mt-6 rounded-full bg-primary px-5 py-2 text-sm text-primary-foreground"
         >
-          Try again
-        </button>
+          {t("Try again")}
+        </Button>
       </div>
     </div>
   );
@@ -112,7 +115,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        <LanguageProvider>{children}</LanguageProvider>
         <Scripts />
       </body>
     </html>
@@ -141,11 +144,11 @@ function RootComponent() {
   }, []);
   return (
     <QueryClientProvider client={queryClient}>
-      <LanguageProvider>
+      <>
         <LanguageSelector />
         <Outlet />
         <Toaster position="top-center" />
-      </LanguageProvider>
+      </>
     </QueryClientProvider>
   );
 }

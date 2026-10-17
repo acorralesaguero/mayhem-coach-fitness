@@ -43,7 +43,7 @@ export const Route = createFileRoute("/_authenticated/today")({
   component: TodayPage,
 });
 function TodayPage() {
-  const { t, language } = useTranslation();
+  const { t, tError, language, locale } = useTranslation();
   const { data: profile, error: profileError } = useProfile(),
     { data: week } = useWeekPlan(),
     { data: workout, isPending } = useTodayWorkout(),
@@ -92,7 +92,7 @@ function TodayPage() {
       )
         .then(async ({ data: id, error }) => {
           if (error) {
-            toast.error("Couldn't save your sample session. Please check in below.");
+            toast.error(t("Couldn't save your sample session. Please check in below."));
             return;
           }
           localStorage.removeItem("forge:pending-session");
@@ -106,9 +106,7 @@ function TodayPage() {
                 },
               });
             } catch {
-              toast.error(
-                "Couldn't apply your limitations automatically — use 'Ask your coach to adjust'.",
-              );
+              toast.error(t("Couldn't apply your limitations automatically — use 'Ask your coach to adjust'."));
             }
           await refresh();
         })
@@ -130,7 +128,7 @@ function TodayPage() {
           {t(" ·")}
           {t(" ")}
           {t(
-            new Date().toLocaleDateString(language === "es" ? "es" : "en", {
+            new Date().toLocaleDateString(locale, {
               month: "long",
               day: "numeric",
             }),
@@ -178,7 +176,7 @@ function CheckIn({
   recentTitles: string[];
   onDone: () => Promise<void>;
 }) {
-  const { t, language } = useTranslation();
+  const { t, tError, language, locale } = useTranslation();
   const [duration, setDuration] = useState<30 | 60 | 90>(
       initialDuration === 30 ? 30 : initialDuration === 90 ? 90 : 60,
     ),
@@ -233,14 +231,12 @@ function CheckIn({
           try {
             await adjust({ data: { workoutId: id, language, message } });
           } catch {
-            toast.error(
-              "Couldn't apply your limitations automatically — use 'Ask your coach to adjust'.",
-            );
+            toast.error(t("Couldn't apply your limitations automatically — use 'Ask your coach to adjust'."));
           }
       }
       await onDone();
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(tError((e as Error).message));
     } finally {
       setBusy(false);
     }
@@ -333,7 +329,7 @@ function CheckIn({
         disabled={busy || energy === null || soreness === null || sleep === null}
         onClick={submit}
       >
-        {t(busy ? "Preparing your session…" : `Get today's ${duration}-minute workout`)}
+        {busy ? t("Preparing your session…") : language === "es" ? `Ver la sesión de hoy de ${duration} minutos` : `Get today's ${duration}-minute workout`}
       </Button>
     </div>
   );
@@ -351,7 +347,7 @@ function WorkoutView({
   week: Database["public"]["Tables"]["week_plan"]["Row"][];
   onChange: () => Promise<void>;
 }) {
-  const { t, language } = useTranslation();
+  const { t, tError, language, locale } = useTranslation();
   const initial = w.plan as unknown as WorkoutPlan;
   const [plan, setPlan] = useState(initial),
     [rpe, setRpe] = useState(w.rpe ?? 7),
@@ -368,7 +364,7 @@ function WorkoutView({
       .update({ plan: next as never })
       .eq("id", w.id)
       .eq("user_id", profile.id);
-    if (error) toast.error(error.message);
+    if (error) toast.error(tError(error.message));
     else await onChange();
   }
   function patchEx(i: number, j: number, patch: Partial<PlanExercise>) {
@@ -388,9 +384,9 @@ function WorkoutView({
       await adjust({ data: { workoutId: w.id, language, message: note.trim() } });
       setNote("");
       await onChange();
-      toast.success("Session adjusted");
+      toast.success(t("Session adjusted"));
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(tError((e as Error).message));
     } finally {
       setBusy(false);
     }
@@ -409,11 +405,11 @@ function WorkoutView({
     }
   }
   const recap = [
-    w.title,
+    t(w.title),
     `${w.duration} min · RPE ${w.rpe ?? rpe}`,
-    ...plan.blocks.filter((b) => b.result).map((b) => `${b.name}: ${b.result}`),
-    `${currentStreak} week streak`,
-    `Next: ${next}`,
+    ...plan.blocks.filter((b) => b.result).map((b) => `${t(b.name)}: ${t(b.result)}`),
+    `${currentStreak} ${t("week streak")}`,
+    `${t("Next:")} ${t(next)}`,
   ].join("\n");
   return (
     <div>
@@ -429,7 +425,7 @@ function WorkoutView({
         plan.limitations_applied && (
           <p className="text-sm text-muted-foreground">
             {t(" Limitations applied: ")}
-            {t(plan.limitations_applied)}
+            {plan.limitations_applied}
           </p>
         ),
       )}
@@ -492,7 +488,7 @@ function WorkoutView({
                   onBlur={(e) => {
                     const value = e.target.value;
                     if (value && !/^\d{1,3}:[0-5]\d$/.test(value)) {
-                      toast.error("Use mm:ss for finish time");
+                      toast.error(t("Use mm:ss for finish time"));
                       return;
                     }
                     savePlan({
@@ -512,7 +508,7 @@ function WorkoutView({
                 (e.actual?.weight || e.actual?.reps) && (
                   <p className="mt-2 text-sm">
                     {t(" Logged: ")}
-                    {t(e.actual.weight)} {t(e.actual.reps && `· ${e.actual.reps} reps`)}
+                    {e.actual.weight} {t(e.actual.reps && `· ${e.actual.reps} reps`)}
                   </p>
                 ),
               )}
@@ -649,9 +645,9 @@ function WorkoutView({
               onClick={async () => {
                 try {
                   await navigator.clipboard.writeText(recap);
-                  toast.success("Summary copied");
+                  toast.success(t("Summary copied"));
                 } catch {
-                  toast.error("Clipboard unavailable");
+                  toast.error(t("Clipboard unavailable"));
                 }
               }}
             >
@@ -694,9 +690,9 @@ function WorkoutView({
                   .eq("id", w.id)
                   .eq("user_id", profile.id);
                 setBusy(false);
-                if (error) toast.error(error.message);
+                if (error) toast.error(tError(error.message));
                 else {
-                  toast.success("Logged. Great work.");
+                  toast.success(t("Logged. Great work."));
                   await onChange();
                 }
               }}

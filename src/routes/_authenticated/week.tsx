@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/week")({
 type Day = { day_of_week: number; is_training: boolean; muscle_groups: string[]; duration: number };
 
 function WeekPage() {
-  const { t } = useTranslation();
+  const { t, tError } = useTranslation();
   const { user } = useAuth();
   const [days, setDays] = useState<Day[] | null>(null);
   const [open, setOpen] = useState<number | null>(new Date().getDay());
@@ -52,9 +52,9 @@ function WeekPage() {
       days.map((d) => ({ ...d, suggested: false, user_id: user.id })),
       { onConflict: "user_id,day_of_week" },
     );
-    if (error) toast.error(error.message);
+    if (error) toast.error(tError(error.message));
     else {
-      toast.success("Week saved");
+      toast.success(t("Week saved"));
       await refresh();
     }
   }

@@ -67,7 +67,7 @@ function beep(freq = 880, dur = 0.15) {
 }
 
 function TimerPage() {
-  const { t } = useTranslation();
+  const { t, tError } = useTranslation();
   const search = Route.useSearch();
   const { w: wid, b: bidx, ...cfgSearch } = search;
   const initial: TimerConfig = {
@@ -116,9 +116,9 @@ function TimerPage() {
       if (updateError) throw updateError;
       setBlock(next.blocks[bidx] ?? null);
       await refresh();
-      toast.success("Score saved");
+      toast.success(t("Score saved"));
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(tError((e as Error).message));
     } finally {
       setSaving(false);
     }
@@ -456,7 +456,7 @@ function Stepper({
   max: number;
   step?: number;
 }) {
-  const { t } = useTranslation();
+  const { t, tError } = useTranslation();
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
       <span className="text-sm">{t(label)}</span>

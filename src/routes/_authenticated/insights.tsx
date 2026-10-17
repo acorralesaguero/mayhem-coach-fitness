@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_authenticated/insights")({
   component: Insights,
 });
 function Insights() {
-  const { t } = useTranslation();
+  const { t, tError, locale } = useTranslation();
   const { data: checks, isPending } = useCheckins(),
     { data: works } = useWorkouts(),
     { data: profile } = useProfile(),
@@ -42,7 +42,7 @@ function Insights() {
     .slice(0, 14)
     .reverse()
     .map((c) => ({
-      date: c.checkin_date.slice(5),
+      date: new Date(c.checkin_date + "T12:00:00").toLocaleDateString(locale, { day: "numeric", month: "short" }),
       energy: c.energy,
       sleep: Number(c.sleep_hours),
     }));
@@ -50,7 +50,7 @@ function Insights() {
     const d = weekStart(new Date());
     d.setDate(d.getDate() - (7 - i) * 7);
     return {
-      week: dateKey(d).slice(5),
+      week: d.toLocaleDateString(locale, { day: "numeric", month: "short" }),
       sessions: works.filter(
         (w) =>
           w.completed && dateKey(weekStart(new Date(w.workout_date + "T12:00:00"))) === dateKey(d),
@@ -73,28 +73,28 @@ function Insights() {
                     yAxisId="energy"
                     domain={[0, 5]}
                     width={35}
-                    label={{ value: "Energy", angle: -90, position: "insideLeft" }}
+                    label={{ value: t("Energy"), angle: -90, position: "insideLeft" }}
                   />
                   <YAxis
                     yAxisId="sleep"
                     orientation="right"
                     domain={[0, 12]}
                     width={40}
-                    label={{ value: "Hours", angle: 90, position: "insideRight" }}
+                    label={{ value: t("Hours"), angle: 90, position: "insideRight" }}
                   />
                   <Tooltip />
                   <Legend />
                   <Line
                     yAxisId="energy"
                     dataKey="energy"
-                    name="Energy"
+                    name={t("Energy")}
                     stroke="var(--clay)"
                     isAnimationActive={false}
                   />
                   <Line
                     yAxisId="sleep"
                     dataKey="sleep"
-                    name="Sleep hours"
+                    name={t("Sleep hours")}
                     stroke="var(--olive)"
                     isAnimationActive={false}
                   />
@@ -116,7 +116,7 @@ function Insights() {
               <XAxis dataKey="week" />
               <YAxis allowDecimals={false} />
               <Tooltip />
-              <Bar dataKey="sessions" fill="var(--olive)" isAnimationActive={false} />
+              <Bar name={t("Sessions")} dataKey="sessions" fill="var(--olive)" isAnimationActive={false} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -143,7 +143,7 @@ function Insights() {
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {t(pr.date)}
+                  {new Date(pr.date + "T12:00:00").toLocaleDateString(locale)}
                   {t(" · Epley estimate")}
                 </p>
                 {t(
@@ -168,7 +168,7 @@ function Insights() {
                                 [lift]: roundLoad(pr.value, profile.units === "kg" ? "kg" : "lb"),
                               } as Partial<Record<Lift, number>>)
                               .eq("id", profile.id);
-                            if (error) toast.error(error.message);
+                            if (error) toast.error(tError(error.message));
                             else await refresh();
                           }}
                         >
@@ -194,7 +194,7 @@ function Insights() {
                 <div>
                   <p className="font-semibold">{t(w.title)}</p>
                   <p className="text-sm text-muted-foreground">
-                    {t(w.workout_date)}
+                    {new Date(w.workout_date + "T12:00:00").toLocaleDateString(locale)}
                     {t(" · ")}
                     {t(w.duration)}
                     {t(" min ")}

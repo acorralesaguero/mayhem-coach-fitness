@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
   component: Onboarding,
 });
 function Onboarding() {
-  const { t } = useTranslation();
+  const { t, tError } = useTranslation();
   const { user } = useAuth(),
     { data: p } = useProfile(),
     refresh = useRefresh(),
@@ -75,7 +75,7 @@ function Onboarding() {
         navigate({ to: "/today" });
       } else setStep(step + 1);
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(tError((e as Error).message));
     } finally {
       setBusy(false);
     }
