@@ -6,6 +6,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/lib/use-auth";
@@ -91,9 +92,12 @@ function AuthPage() {
   }
   return (
     <main className="mx-auto flex min-h-[100dvh] max-w-sm flex-col justify-center px-6 py-10">
-      <Link to="/" className="font-display text-2xl">
-        {t(BRAND.name)}
-      </Link>
+      <div className="flex items-center justify-between gap-3">
+        <Link to="/" className="font-display text-2xl">
+          {t(BRAND.name)}
+        </Link>
+        <LanguageSelector />
+      </div>
       {t(
         sent ? (
           <>

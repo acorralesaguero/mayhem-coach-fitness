@@ -7,6 +7,7 @@ import webp800 from "@/assets/forge-start-800.webp";
 import webp1600 from "@/assets/forge-start-1600.webp";
 import logo from "@/assets/forge-logo.png";
 import { BRAND, pageHead } from "@/lib/brand";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { buildSession } from "@/lib/program";
 import { WorkoutBlocks } from "@/components/WorkoutBlocks";
 import { Button } from "@/components/ui/button";
@@ -68,17 +69,26 @@ function Home() {
         </picture>
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/90 to-ink/50" />
         <div className="relative mx-auto max-w-5xl px-6 pb-12 pt-7">
-          <header className="mb-20 flex items-center justify-between gap-4">
-            <img src={logo} alt={t(BRAND.name)} width={260} height={54} className="w-40" />
-            <Button
-              asChild
-              variant="outline"
-              className="border-ink-foreground/40 bg-transparent text-ink-foreground"
-            >
-              <Link to="/auth" search={{ mode: "signin" }}>
-                {t(" Sign in ")}
-              </Link>
-            </Button>
+          <header className="mb-20 flex items-center justify-between gap-2 sm:gap-3">
+            <img
+              src={logo}
+              alt={t(BRAND.name)}
+              width={260}
+              height={54}
+              className="w-28 sm:w-40"
+            />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <LanguageSelector tone="dark" />
+              <Button
+                asChild
+                variant="outline"
+                className="border-ink-foreground/40 bg-transparent px-3 text-sm whitespace-nowrap text-ink-foreground sm:px-4 sm:text-base"
+              >
+                <Link to="/auth" search={{ mode: "signin" }}>
+                  {t(" Sign in ")}
+                </Link>
+              </Button>
+            </div>
           </header>
           <p className="eyebrow text-sand">
             {t(BRAND.name)}

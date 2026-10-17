@@ -1,6 +1,7 @@
 import { useTranslation } from "@/lib/i18n";
 import { Link } from "@tanstack/react-router";
 import { BRAND } from "@/lib/brand";
+import { LanguageSelector } from "@/components/LanguageSelector";
 export function PolicyPage({ kind }: { kind: "privacy" | "terms" }) {
   const { t } = useTranslation();
   const sections =
@@ -63,10 +64,13 @@ export function PolicyPage({ kind }: { kind: "privacy" | "terms" }) {
         ];
   return (
     <main className="mx-auto max-w-2xl px-6 py-10">
-      <Link to="/">
-        {t("← ")}
-        {t(BRAND.name)}
-      </Link>
+      <div className="flex items-center justify-between gap-3">
+        <Link to="/">
+          {t("← ")}
+          {t(BRAND.name)}
+        </Link>
+        <LanguageSelector />
+      </div>
       <h1 className="mt-8 text-5xl">
         {t(kind === "privacy" ? "Privacy Policy" : "Terms of Service")}
       </h1>

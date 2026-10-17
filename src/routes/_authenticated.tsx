@@ -7,6 +7,7 @@ import { PageSkeleton } from "@/components/PageSkeleton";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { Consent } from "@/components/Consent";
 import { useAuth } from "@/lib/use-auth";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -34,7 +35,10 @@ function Layout() {
   return (
     <div className="min-h-[100dvh] pb-24">
       {t(session && <InstallPrompt />)}
-      <div className="mx-auto max-w-xl px-5 pt-6">
+      <div className="mx-auto flex max-w-xl justify-end px-5 pt-4">
+        <LanguageSelector />
+      </div>
+      <div className="mx-auto max-w-xl px-5 pt-2">
         {t(
           loading || !session || !profile ? (
             <PageSkeleton />
