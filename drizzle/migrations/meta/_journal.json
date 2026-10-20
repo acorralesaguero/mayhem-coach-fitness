@@ -29,6 +29,13 @@
       "when": 1792249870122,
       "tag": "0003_forge_validate_ownership_and_setup",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792466684096,
+      "tag": "0004_workout_date_from_client",
+      "breakpoints": true
     }
   ]
 }
