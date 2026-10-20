@@ -87,6 +87,7 @@ function TodayPage() {
             title: pending.plan.title,
             duration: pending.duration,
             muscle_groups: ["Full body"],
+            date: dateKey(new Date()),
           },
         }),
       )
@@ -216,7 +217,13 @@ function CheckIn({
       });
       const { data: id, error } = await supabase.rpc("create_checkin_and_workout", {
         checkin_data: { ...readiness, notes },
-        workout_data: { plan: plan as never, title: plan.title, duration, muscle_groups: groups },
+        workout_data: {
+          plan: plan as never,
+          title: plan.title,
+          duration,
+          muscle_groups: groups,
+          date: dateKey(new Date()),
+        },
       });
       if (error) throw error;
       if (id) {
