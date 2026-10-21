@@ -11,6 +11,7 @@ import { LanguageSelector } from "@/components/LanguageSelector";
 import { buildSession } from "@/lib/program";
 import { WorkoutBlocks } from "@/components/WorkoutBlocks";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/use-auth";
 import {
   Accordion,
   AccordionItem,
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/")({
 });
 function Home() {
   const { t } = useTranslation();
+  const { session, loading } = useAuth();
   const plan = buildSession({
     date: new Date(2026, 9, 17),
     duration: 60,
@@ -82,10 +84,12 @@ function Home() {
               <Button
                 asChild
                 variant="outline"
+                disabled={loading}
+                aria-busy={loading}
                 className="border-ink-foreground/40 bg-transparent px-3 text-sm whitespace-nowrap text-ink-foreground sm:px-4 sm:text-base"
               >
-                <Link to="/auth" search={{ mode: "signin" }}>
-                  {t(" Sign in ")}
+                <Link to={session ? "/today" : "/auth"} search={session ? {} : { mode: "signin" }}>
+                  {t(loading ? "Please wait…" : session ? "Today" : " Sign in ")}
                 </Link>
               </Button>
             </div>
@@ -106,7 +110,9 @@ function Home() {
             {t(" adjusts your loads and your session for your equipment and injuries. ")}
           </p>
           <Button asChild variant="clay" size="xl" className="mt-7">
-            <Link to="/try">{t("Try today's workout — no account")}</Link>
+            <Link to={session ? "/today" : "/try"}>
+              {t(session ? "Today" : "Try today's workout — no account")}
+            </Link>
           </Button>
         </div>
       </section>

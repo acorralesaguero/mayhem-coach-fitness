@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Verify returning-user session restoration and make start-page account links session-aware; reload, reopened saved browser and EN/ES account navigation verified
 - [x] Complete Latin American Spanish across Profile, Week, Today, Timer and Insights; signed-in switching, unchanged profile values and timer controls verified (Today awaits exercise-clearance setup below)
 - [x] Language switcher as a compact EN/ES segmented control beside the sign-in button and in account screen headers
 - [x] Adapt Spanish for Latin America; verify sample workout/input parity, canonical save, remembered switching and public pages (signed-in checks remain blocked below)
