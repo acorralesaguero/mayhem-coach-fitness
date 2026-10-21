@@ -12,6 +12,7 @@
 # Agent rules
 - Start-screen branding uses an imported transparent logo asset and an icon derived from its symbol, keeping app identity consistent.
 - Signed-in pages live under src/routes/_authenticated (client-only guard, bottom nav) — sessions live in browser storage.
+- Start-page account links reflect the restored auth session and wait for hydration before offering sign-in — returning athletes should not see a false sign-in prompt.
 - Workout content is typed data in library.ts; program.ts performs pure, tested selection, equipment/experience adaptation and percentage loading — separates authored content from athlete rules.
 - Timer math is pure in src/lib/timer.ts with tests in src/test/timer.test.ts — keeps EMOM/Tabata logic verifiable.
 - Exercise swaps are a pure stimulus-matched table in src/lib/swaps.ts (tested); free-text coach adjustments go through adjustWorkout in src/lib/coach.functions.ts, which only rewrites affected exercises — keeps fixed programming intact.
