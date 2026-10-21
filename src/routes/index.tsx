@@ -88,7 +88,7 @@ function Home() {
                 aria-busy={loading}
                 className="border-ink-foreground/40 bg-transparent px-3 text-sm whitespace-nowrap text-ink-foreground sm:px-4 sm:text-base"
               >
-                <Link to={session ? "/today" : "/auth"} search={session ? undefined : { mode: "signin" }}>
+                <Link to={session ? "/today" : "/auth"} search={session ? {} : { mode: "signin" }}>
                   {t(loading ? "Please wait…" : session ? "Today" : " Sign in ")}
                 </Link>
               </Button>
