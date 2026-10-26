@@ -482,3 +482,41 @@ for (const list of [
       }
     }
   }
+
+// Simple "builder" bodybuilding supersets that pair with the functional blocks.
+export const PUMP: Record<Exclude<Focus, "recovery">, Ex[]> = {
+  lower: [
+    { name: "Goblet squat", reps: "3 x 12", cue: "Slow down, drive up", rx: [35, 26] },
+    { name: "Dumbbell Romanian deadlift", reps: "3 x 12", cue: "Hinge, soft knees", rx: [35, 25] },
+    { name: "Glute bridge", reps: "3 x 15", cue: "Squeeze at the top" },
+    { name: "Calf raises", reps: "3 x 20", cue: "Full range, pause at top" },
+  ],
+  upper: [
+    { name: "Dumbbell biceps curl", reps: "3 x 12", cue: "Elbows pinned", rx: [25, 15] },
+    { name: "Dumbbell triceps extension", reps: "3 x 12", cue: "Elbows to the ceiling", rx: [25, 15] },
+    { name: "Push-ups", reps: "3 x max -2", cue: "Body in one line" },
+    { name: "Dumbbell row", reps: "3 x 12/arm", cue: "Pull to the hip", rx: [40, 25] },
+  ],
+  engine: [
+    { name: "Push-ups", reps: "3 x 12", cue: "Body in one line" },
+    { name: "Dumbbell row", reps: "3 x 12/arm", cue: "Pull to the hip", rx: [40, 25] },
+    { name: "Dumbbell lateral raise", reps: "3 x 15", cue: "Lead with elbows", rx: [15, 10] },
+  ],
+  oly: [
+    { name: "Dumbbell shoulder press", reps: "3 x 10", cue: "Ribs down", rx: [35, 20] },
+    { name: "Pull-ups", reps: "3 x 6–10", cue: "Chest to the bar" },
+    { name: "Dumbbell biceps curl", reps: "3 x 12", cue: "Elbows pinned", rx: [25, 15] },
+  ],
+  full: [
+    { name: "Dumbbell bench press", reps: "3 x 12", cue: "Shoulder blades pinned", rx: [40, 25] },
+    { name: "Dumbbell row", reps: "3 x 12/arm", cue: "Pull to the hip", rx: [40, 25] },
+    { name: "Dumbbell biceps curl", reps: "3 x 12", cue: "Elbows pinned", rx: [25, 15] },
+    { name: "Dumbbell triceps extension", reps: "3 x 12", cue: "Elbows to the ceiling", rx: [25, 15] },
+  ],
+};
+export const TABATA_CORE: Ex[] = [
+  { name: "Hollow rock", reps: "20 s on / 10 s off", cue: "Low back down" },
+  { name: "Mountain climbers", reps: "20 s on / 10 s off", cue: "Hips level" },
+];
+for (const list of [...Object.values(PUMP), TABATA_CORE])
+  for (const m of list) m.requires = equipmentFor(m.name);
