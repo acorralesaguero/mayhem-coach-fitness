@@ -562,7 +562,7 @@ function WorkoutView({
                         actual: {
                           ...e.actual,
                           weight: ev.target.value,
-                          weight_num: parseNumeric(ev.target.value),
+                          weight_num: parseNumeric(ev.target.value.trim().split(/\s+/)[0] ?? ""),
                         },
                       }),
                     );
@@ -726,7 +726,7 @@ function WorkoutView({
                       if (e.actual?.weight || e.actual?.reps) return e;
                       const f = fill(e);
                       if (!f.weight && !f.reps) return e;
-                      return { ...e, actual: { weight: f.weight, reps: f.reps, weight_num: parseNumeric(f.weight), reps_num: parseNumeric(f.reps) } };
+                      return { ...e, actual: { weight: f.weight, reps: f.reps, weight_num: parseNumeric(f.weight.split(" ")[0] ?? ""), reps_num: parseNumeric(f.reps) } };
                     }),
                   })),
                 };
