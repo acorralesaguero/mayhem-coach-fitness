@@ -3,7 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useWeekPlan, useRefresh } from "@/lib/data";
+import { useWeekPlan, useRefresh, useProfile } from "@/lib/data";
+import { buildSession } from "@/lib/program";
 import { pageHead } from "@/lib/brand";
 import { PageSkeleton } from "@/components/PageSkeleton";
 import { useAuth } from "@/lib/use-auth";
@@ -26,6 +27,7 @@ function WeekPage() {
   const [open, setOpen] = useState<number | null>(new Date().getDay());
 
   const { data: week } = useWeekPlan();
+  const { data: profile } = useProfile();
   const refresh = useRefresh();
   useEffect(() => {
     if (week)
@@ -60,6 +62,20 @@ function WeekPage() {
   }
 
   const count = days.filter((d) => d.is_training).length;
+  const preview = (d: Day) => {
+    const date = new Date();
+    date.setDate(date.getDate() + ((d.day_of_week - date.getDay() + 7) % 7));
+    return buildSession({
+      date,
+      duration: d.duration === 30 ? 30 : d.duration === 90 ? 90 : 60,
+      groups: d.muscle_groups,
+      benchmarks: profile ?? {},
+      readiness: { energy: 3, sleep_hours: 7, sleep_quality: null, stress: null, soreness: 3, motivation: null },
+      tier: "scaled",
+      equipment: profile?.equipment ?? [],
+      experience: profile?.experience ?? null,
+    });
+  };
   return (
     <div className="space-y-4">
       <header>
@@ -103,6 +119,34 @@ function WeekPage() {
                   }}
                 />
               </div>
+              {t(
+                d.is_training && (
+                  <details className="border-t px-4 py-2">
+                    <summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold">
+                      {t(preview(d).title)}
+                    </summary>
+                    <div className="space-y-3 pb-3">
+                      {preview(d).blocks.map((b, bi) => (
+                        <div key={bi}>
+                          <p className="eyebrow">
+                            {t(b.name)} · {t(b.minutes)}
+                            {t(" min · ")}
+                            {t(b.format)}
+                          </p>
+                          <ul className="mt-1 text-sm">
+                            {b.exercises.map((e, ei) => (
+                              <li key={ei} className="flex justify-between gap-2">
+                                <span>{t(e.name)}</span>
+                                <span className="text-right text-clay">{t(e.prescription)}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                ),
+              )}
               {t(
                 open === d.day_of_week && d.is_training && (
                   <div className="space-y-4 border-t p-4">
