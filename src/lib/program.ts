@@ -3,10 +3,11 @@ import {
   PHASES,
   WAVE,
   METCONS,
-  ACCESSORY,
   WARMUP,
   STRENGTH_OPTIONS,
   RECOVERY,
+  PUMP,
+  TABATA_CORE,
   equipmentFor,
   type Ex,
   type Focus,
@@ -274,12 +275,32 @@ export function buildSession(opts: {
     exercises: metEx,
   });
   const spare = duration - blocks.reduce((s, x) => s + x.minutes, 0);
-  if (spare > 0)
+  const finisher = spare >= 14 ? 4 : 0;
+  if (spare - finisher > 0)
     blocks.push({
-      name: "Accessory & easy conditioning",
-      format: "Controlled sets, easy finish",
-      minutes: spare,
-      exercises: ACCESSORY[focus].map(rx),
+      name: "Builder",
+      format: "Supersets · 60 s rest",
+      minutes: spare - finisher,
+      exercises: PUMP[focus].map((e) =>
+        adaptExercise(
+          {
+            name: e.name,
+            prescription: loadFor(e, b, units, factor, tier),
+            rest: "",
+            cue: e.cue,
+            requires: e.requires,
+          },
+          opts.equipment ?? [],
+          opts.experience,
+        ),
+      ),
+    });
+  if (finisher)
+    blocks.push({
+      name: "Core finisher",
+      format: "Tabata 8 rounds",
+      minutes: finisher,
+      exercises: TABATA_CORE.map(rx),
     });
 
   const intensity: WorkoutPlan["intensity"] =

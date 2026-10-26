@@ -1,4 +1,5 @@
 # Roadmap
+- [x] One-tap workout start with optional check-in, daily focus/equipment picker, Builder supersets + Tabata finisher, full-week exercise preview, pre-filled weight/reps saved on completion; signed-in reloads verified
 - [x] Verify returning-user session restoration and make start-page account links session-aware; reload, reopened saved browser and EN/ES account navigation verified
 - [x] Complete Latin American Spanish across Profile, Week, Today, Timer and Insights; signed-in switching, unchanged profile values and timer controls verified (Today awaits exercise-clearance setup below)
 - [x] Language switcher as a compact EN/ES segmented control beside the sign-in button and in account screen headers

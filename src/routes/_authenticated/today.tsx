@@ -23,7 +23,7 @@ import {
   type WorkoutPlan,
   type Tier,
 } from "@/lib/program";
-import { dateKey, parseNumeric, streak, prBoard, type HistoryWorkout } from "@/lib/progress";
+import { dateKey, parseNumeric, prefillActual, streak, prBoard, type HistoryWorkout } from "@/lib/progress";
 import { swapOptions } from "@/lib/swaps";
 import { guessTimer } from "@/lib/timer";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,7 +34,7 @@ import { Chips, Scale, Section } from "@/components/Chips";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { DAYS, DURATIONS, MUSCLE_GROUPS } from "@/lib/options";
+import { DAYS, DURATIONS, EQUIPMENT, MUSCLE_GROUPS } from "@/lib/options";
 import type { Database } from "@/integrations/supabase/types";
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 type Workout = Database["public"]["Tables"]["workouts"]["Row"];
@@ -190,16 +190,18 @@ function CheckIn({
     [motivation, setMotivation] = useState<number | null>(null),
     [notes, setNotes] = useState(""),
     [tier, setTier] = useState<Tier>("scaled"),
+    [tools, setTools] = useState<string[]>(profile.equipment?.length ? profile.equipment : ["Full gym"]),
     [busy, setBusy] = useState(false);
   const adjust = useServerFn(adjustWorkout);
-  async function submit() {
-    if (energy === null || soreness === null || sleep === null || busy) return;
+  const checkedIn = energy !== null && soreness !== null && sleep !== null;
+  async function submit(quick = false) {
+    if ((!quick && !checkedIn) || busy) return;
     setBusy(true);
     try {
       const readiness = {
-        energy,
-        soreness,
-        sleep_hours: sleep,
+        energy: energy ?? 3,
+        soreness: soreness ?? 3,
+        sleep_hours: sleep ?? 7,
         sleep_quality: quality,
         stress,
         motivation,
@@ -211,12 +213,12 @@ function CheckIn({
         benchmarks: profile,
         readiness,
         tier,
-        equipment: profile.equipment,
+        equipment: tools,
         experience: profile.experience,
         recentTitles,
       });
       const { data: id, error } = await supabase.rpc("create_checkin_and_workout", {
-        checkin_data: { ...readiness, notes },
+        checkin_data: quick && !checkedIn ? (null as never) : { ...readiness, notes },
         workout_data: {
           plan: plan as never,
           title: plan.title,
@@ -257,6 +259,20 @@ function CheckIn({
           </p>
         ),
       )}
+      <Button
+        variant="clay"
+        size="xl"
+        className="my-4 w-full"
+        disabled={busy}
+        onClick={() => submit(true)}
+      >
+        {busy ? t("Preparing your session…") : tx("Start today's {minutes}-minute workout", { minutes: duration })}
+      </Button>
+      <p className="text-sm text-muted-foreground">
+        {groups.length ? groups.map((g) => t(g)).join(", ") : t("Planned focus")} · {tools.map((g) => t(g)).join(", ")}
+      </p>
+      <details className="mt-4 rounded-lg border p-4">
+        <summary className="min-h-11 cursor-pointer font-semibold">{t("Check in & customize")}</summary>
       <Section title={t("Readiness")}>
         <div className="space-y-5">
           <Scale label="Energy" low="drained" high="charged" value={energy} onChange={setEnergy} />
@@ -314,10 +330,10 @@ function CheckIn({
       </Section>
       <Section title={t("Session")}>
         <Chips options={DURATIONS} value={duration} onChange={setDuration} />
-        <details className="mt-4">
-          <summary className="min-h-11 cursor-pointer">{t("Change focus")}</summary>
-          <Chips multi options={MUSCLE_GROUPS} value={groups} onChange={setGroups} />
-        </details>
+        <p className="eyebrow mb-2 mt-4">{t("Focus today")}</p>
+        <Chips multi options={MUSCLE_GROUPS} value={groups} onChange={setGroups} />
+        <p className="eyebrow mb-2 mt-4">{t("Equipment available today")}</p>
+        <Chips multi options={EQUIPMENT} value={tools} onChange={(v: string[]) => setTools(v.length ? v : ["Bodyweight only"])} />
         <Chips label="Workout tier" options={["scaled", "rx"]} value={tier} onChange={setTier} />
       </Section>
       <Section title={t("Anything to account for today?")}>
@@ -333,11 +349,12 @@ function CheckIn({
         variant="clay"
         size="xl"
         className="my-5 w-full"
-        disabled={busy || energy === null || soreness === null || sleep === null}
-        onClick={submit}
+        disabled={busy || !checkedIn}
+        onClick={() => submit()}
       >
         {busy ? t("Preparing your session…") : tx("Get today's {minutes}-minute workout", { minutes: duration })}
       </Button>
+      </details>
     </div>
   );
 }
@@ -399,6 +416,8 @@ function WorkoutView({
     }
   }
   const history = works.map((x) => ({ ...x, plan: x.plan as unknown as WorkoutPlan }));
+  const past = history.filter((x) => x.id !== w.id);
+  const fill = (e: PlanExercise) => prefillActual(e, past, profile.units ?? "lb");
   const prs = prBoard(history);
   const newPrs = Object.entries(prs).filter(([, pr]) => pr.date === w.workout_date);
   const planned = week.filter((d) => d.is_training).length;
@@ -535,7 +554,7 @@ function WorkoutView({
                 <Input
                   aria-label={tx("{exercise} weight used", { exercise: t(e.name) })}
                   placeholder={t("Weight used")}
-                  defaultValue={e.actual?.weight ?? ""}
+                  defaultValue={e.actual?.weight ?? fill(e).weight}
                   onBlur={(ev) => {
                     if (ev.target.value === (e.actual?.weight ?? "")) return;
                     savePlan(
@@ -543,7 +562,7 @@ function WorkoutView({
                         actual: {
                           ...e.actual,
                           weight: ev.target.value,
-                          weight_num: parseNumeric(ev.target.value),
+                          weight_num: parseNumeric(ev.target.value.trim().split(/\s+/)[0] ?? ""),
                         },
                       }),
                     );
@@ -552,7 +571,7 @@ function WorkoutView({
                 <Input
                   aria-label={tx("{exercise} reps done", { exercise: t(e.name) })}
                   placeholder={t("Reps done")}
-                  defaultValue={e.actual?.reps ?? ""}
+                  defaultValue={e.actual?.reps ?? fill(e).reps}
                   onBlur={(ev) => {
                     if (ev.target.value === (e.actual?.reps ?? "")) return;
                     savePlan(
@@ -699,9 +718,21 @@ function WorkoutView({
               disabled={busy}
               onClick={async () => {
                 setBusy(true);
+                const logged: WorkoutPlan = {
+                  ...plan,
+                  blocks: plan.blocks.map((b) => ({
+                    ...b,
+                    exercises: b.exercises.map((e) => {
+                      if (e.actual?.weight || e.actual?.reps) return e;
+                      const f = fill(e);
+                      if (!f.weight && !f.reps) return e;
+                      return { ...e, actual: { weight: f.weight, reps: f.reps, weight_num: parseNumeric(f.weight.split(" ")[0] ?? ""), reps_num: parseNumeric(f.reps) } };
+                    }),
+                  })),
+                };
                 const { error } = await supabase
                   .from("workouts")
-                  .update({ completed: true, rpe, feedback })
+                  .update({ completed: true, rpe, feedback, plan: logged as never })
                   .eq("id", w.id)
                   .eq("user_id", profile.id);
                 setBusy(false);
