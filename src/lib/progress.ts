@@ -111,3 +111,28 @@ export function suggestedWeek(days: number, goal: string, experience: string, du
     };
   });
 }
+
+/** Pre-filled log values: the athlete's average of recent logs for this movement, else the prescription. */
+export function prefillActual(
+  e: { name: string; prescription: string },
+  history: { plan: { blocks: { exercises: { name: string; actual?: { weight_num?: number; reps_num?: number } }[] }[] } }[],
+  units: string,
+): { weight: string; reps: string } {
+  const [repsPart = "", load = ""] = e.prescription.split(" @ ");
+  const ws: number[] = [];
+  const rs: number[] = [];
+  for (const w of history.slice(0, 20))
+    for (const b of w.plan?.blocks ?? [])
+      for (const x of b.exercises ?? [])
+        if (x.name === e.name) {
+          if (x.actual?.weight_num) ws.push(x.actual.weight_num);
+          if (x.actual?.reps_num) rs.push(x.actual.reps_num);
+        }
+  const avg = (a: number[]) => Math.round((a.slice(0, 3).reduce((s, v) => s + v, 0) / Math.min(3, a.length)) * 2) / 2;
+  const presWeight = /^\d/.test(load) ? (load.match(/^[\d.]+\s*(lb|kg)/)?.[0] ?? "") : "";
+  const presReps = repsPart.match(/(\d+)(?!.*\d)/)?.[1] ?? "";
+  return {
+    weight: ws.length ? `${avg(ws)} ${units}` : presWeight,
+    reps: rs.length ? String(avg(rs)) : /\b(s|min|m|cal)\b/.test(repsPart) ? "" : presReps,
+  };
+}
