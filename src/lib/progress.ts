@@ -115,7 +115,7 @@ export function suggestedWeek(days: number, goal: string, experience: string, du
 /** Pre-filled log values: the athlete's average of recent logs for this movement, else the prescription. */
 export function prefillActual(
   e: { name: string; prescription: string },
-  history: { plan: { blocks: { exercises: { name: string; actual?: { weight_num?: number; reps_num?: number } }[] }[] } }[],
+  history: { plan: { blocks: { exercises: { name: string; actual?: { weight_num?: number | undefined; reps_num?: number | undefined } | undefined }[] }[] } }[],
   units: string,
 ): { weight: string; reps: string } {
   const [repsPart = "", load = ""] = e.prescription.split(" @ ");
