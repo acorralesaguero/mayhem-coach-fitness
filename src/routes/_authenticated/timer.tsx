@@ -255,7 +255,7 @@ function TimerPage() {
                           : "Work",
           )}
         </p>
-        <div className="mt-2 font-display text-[6.5rem] leading-none tabular-nums">
+        <div className="mt-4 text-[5rem] font-semibold leading-none tabular-nums sm:text-[6.5rem]">
           {t(countdown ?? big)}
         </div>
         {t(
@@ -336,7 +336,7 @@ function TimerPage() {
       )}
       {t(
         block && (
-          <section className="surface p-5">
+          <section className="border-b py-5">
             <p className="eyebrow">
               {t(block.minutes)}
               {t(" min · ")}
@@ -367,7 +367,7 @@ function TimerPage() {
 
       {t(
         editable && (
-          <section className="surface space-y-4 p-5">
+          <section className="space-y-5 border-t py-5">
             <p className="eyebrow">{t("Settings")}</p>
             {t(
               (cfg.mode === "fortime" || cfg.mode === "amrap") && (

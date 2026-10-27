@@ -87,7 +87,7 @@ function ProfilePage() {
   }
   return (
     <div>
-      <header className="flex justify-between gap-3">
+      <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-4xl">{t("Your blueprint")}</h1>
         <Button variant="ghost" onClick={() => supabase.auth.signOut()}>
           {t(" Sign out ")}

@@ -271,7 +271,7 @@ function CheckIn({
       <p className="text-sm text-muted-foreground">
         {groups.length ? groups.map((g) => t(g)).join(", ") : t("Planned focus")} · {tools.map((g) => t(g)).join(", ")}
       </p>
-      <details className="mt-4 rounded-lg border p-4">
+      <details className="mt-6 border-y py-3">
         <summary className="min-h-11 cursor-pointer font-semibold">{t("Check in & customize")}</summary>
       <Section title={t("Readiness")}>
         <div className="space-y-5">
@@ -453,7 +453,7 @@ function WorkoutView({
         {t(" min · ")}
         {t(plan.intensity)}
       </p>
-      <blockquote className="my-5 border-l-4 border-clay pl-4 font-display text-xl">
+      <blockquote className="my-5 border-l-2 border-clay pl-4 text-base leading-relaxed text-muted-foreground">
         {coachNote}
       </blockquote>
       {t(

@@ -73,7 +73,7 @@ export function Scale({
               aria-checked={value === n}
               aria-label={t(`${label} ${n} of 5`)}
               variant={value === n ? "ink" : "outline"}
-              className="h-11"
+              className="h-12 rounded-full tabular-nums"
               onClick={() => onChange(n)}
             >
               {t(n)}
@@ -88,8 +88,8 @@ export function Section({ title, children }: { title: string; children: React.Re
   const { t } = useTranslation();
   return (
     <SectionLabel.Provider value={title}>
-      <section className="border-b py-5">
-        <p className="eyebrow mb-3">{t(title)}</p>
+      <section className="border-b py-7 last:border-b-0">
+        <p className="mb-4 text-sm font-semibold">{t(title)}</p>
         {t(children)}
       </section>
     </SectionLabel.Provider>

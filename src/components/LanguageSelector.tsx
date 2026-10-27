@@ -1,5 +1,6 @@
 import { useTranslation, type Language } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const OPTIONS: { code: string; value: Language; name: string }[] = [
   { code: "EN", value: "en", name: "English" },
@@ -31,14 +32,15 @@ export function LanguageSelector({
       {OPTIONS.map((option) => {
         const active = language === option.value;
         return (
-          <button
+          <Button
+            variant="ghost"
             key={option.code}
             type="button"
             aria-pressed={active}
             title={option.name}
             onClick={() => setLanguage(option.value)}
             className={cn(
-              "min-h-9 min-w-10 rounded-full px-2.5 text-xs font-semibold tracking-widest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              "min-h-9 min-w-10 rounded-full px-2.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               active
                 ? dark
                   ? "bg-ink-foreground text-ink shadow-sm"
@@ -49,7 +51,7 @@ export function LanguageSelector({
             )}
           >
             {option.code}
-          </button>
+          </Button>
         );
       })}
     </div>
