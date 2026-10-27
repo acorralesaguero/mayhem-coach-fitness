@@ -8,6 +8,7 @@ import { InstallPrompt } from "@/components/InstallPrompt";
 import { Consent } from "@/components/Consent";
 import { useAuth } from "@/lib/use-auth";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { BRAND } from "@/lib/brand";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -33,12 +34,13 @@ function Layout() {
   }, [loading, session, navigate]);
 
   return (
-    <div className="min-h-[100dvh] pb-24">
+    <div className="min-h-[100dvh] pb-32">
       {t(session && <InstallPrompt />)}
-      <div className="mx-auto flex max-w-xl justify-end px-5 pt-4">
+      <div className="mx-auto flex max-w-3xl items-center justify-between px-5 pb-5 pt-6 sm:px-8">
+        <Link to="/today" className="text-xl font-bold" aria-label={BRAND.name}>{BRAND.name}</Link>
         <LanguageSelector />
       </div>
-      <div className="mx-auto max-w-xl px-5 pt-2">
+      <div className="mx-auto max-w-3xl px-5 pt-2 sm:px-8">
         {t(
           loading || !session || !profile ? (
             <PageSkeleton />
@@ -49,15 +51,15 @@ function Layout() {
           ),
         )}
       </div>
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
-        <div className="mx-auto grid max-w-xl grid-cols-5">
+      <nav aria-label={t("Forge")} className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 rounded-full border bg-card/95 p-1.5 shadow-dock backdrop-blur-xl">
           {t(
             NAV.map(({ to, label, icon: Icon }) => (
               <Link
                 key={to}
                 to={to}
-                className="flex flex-col items-center gap-1 py-3 text-[11px] text-muted-foreground"
-                activeProps={{ className: "!text-foreground" }}
+                className="flex min-w-0 flex-col items-center gap-1 rounded-full py-2.5 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-muted sm:text-[11px]"
+                activeProps={{ className: "!bg-primary !text-primary-foreground" }}
               >
                 <Icon className="h-5 w-5" />
                 {t(label)}

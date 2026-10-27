@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 # Agent rules
+- Shared CSS tokens and UI primitives own the neutral surfaces, sans-serif hierarchy and soft controls; screen sections stay unframed and the authenticated shell owns the floating navigation dock to keep the visual system consistent.
 - Start-screen branding uses an imported transparent logo asset and an icon derived from its symbol, keeping app identity consistent.
 - Signed-in pages live under src/routes/_authenticated (client-only guard, bottom nav) — sessions live in browser storage.
 - Start-page account links reflect the restored auth session and wait for hydration before offering sign-in — returning athletes should not see a false sign-in prompt.

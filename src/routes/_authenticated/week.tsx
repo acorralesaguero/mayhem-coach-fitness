@@ -98,11 +98,11 @@ function WeekPage() {
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 p-4">
                 <Button
                   variant="ghost"
-                  className="h-auto min-h-11 min-w-0 justify-start text-left"
+                  className="h-auto min-h-11 min-w-0 flex-col items-start gap-1 rounded-xl text-left"
                   onClick={() => setOpen(open === d.day_of_week ? null : d.day_of_week)}
                 >
-                  <div className="font-display text-2xl leading-none">{t(DAYS[d.day_of_week])}</div>
-                  <div className="mt-1 truncate text-xs text-muted-foreground">
+                  <div className="text-lg font-semibold leading-normal">{t(DAYS[d.day_of_week])}</div>
+                  <div className="w-full whitespace-normal text-sm text-muted-foreground">
                     {t(
                       d.is_training
                         ? `${d.duration} min · ${d.muscle_groups.join(", ") || "choose focus"}`
