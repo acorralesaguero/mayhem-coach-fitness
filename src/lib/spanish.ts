@@ -81,7 +81,7 @@ export const spanish: Record<string, string> = {
   "Open the password reset link from your email.":
     "Abre el enlace de restablecimiento de tu correo.",
   "Adaptive functional-fitness coaching": "Entrenamiento funcional adaptativo",
-  "Workouts that adapt to how you slept.": "Entrenamientos que se adaptan a tu descanso.",
+  "Workouts that adapt to how you feel.": "Entrenamientos que se adaptan a cómo te sientes.",
   "Strength, engine and skill sessions in 30, 60 or 90 minutes. Check in with your energy and sleep, and":
     "Sesiones de fuerza, resistencia y técnica de 30, 60 o 90 minutos. Registra tu energía y descanso, y",
   "adjusts your loads and your session for your equipment and injuries.":

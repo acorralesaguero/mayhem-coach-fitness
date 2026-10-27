@@ -100,7 +100,7 @@ function Home() {
             {t(BRAND.tagline)}
           </p>
           <h1 className="mt-4 max-w-2xl text-5xl leading-tight sm:text-6xl">
-            {t(" Workouts that adapt to how you slept. ")}
+            {t(" Workouts that adapt to how you feel. ")}
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed">
             {t(
