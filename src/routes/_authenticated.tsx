@@ -58,7 +58,7 @@ function Layout() {
               <Link
                 key={to}
                 to={to}
-                className="flex min-w-0 flex-col items-center gap-1 rounded-full py-2.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted"
+                className="flex min-w-0 flex-col items-center gap-1 rounded-full py-2.5 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-muted sm:text-[11px]"
                 activeProps={{ className: "!bg-primary !text-primary-foreground" }}
               >
                 <Icon className="h-5 w-5" />
