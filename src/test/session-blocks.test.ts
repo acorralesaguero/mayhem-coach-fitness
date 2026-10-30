@@ -13,13 +13,21 @@ describe("session blocks", () => {
     const p = buildSession({ ...base, duration: 60, equipment: ["Full gym"] });
     const names = p.blocks.map((b) => b.name);
     expect(names).toContain("Builder");
-    expect(p.blocks.find((b) => b.name === "Builder")?.exercises.map((e) => e.name)).toContain("Dumbbell biceps curl");
+    expect(p.blocks.find((b) => b.name === "Builder")?.exercises.length).toBeGreaterThan(0);
     expect(p.blocks.reduce((s, b) => s + b.minutes, 0)).toBe(60);
   });
   it("today's equipment choice removes dumbbell moves for bodyweight-only", () => {
     const p = buildSession({ ...base, duration: 60, equipment: ["Bodyweight only"] });
     const all = p.blocks.flatMap((b) => b.exercises.map((e) => e.requires));
     expect(all.every((r) => r === "Bodyweight only")).toBe(true);
+  });
+});
+describe("variety", () => {
+  it("warm-up changes from one day to the next", () => {
+    const warm = (d: number) =>
+      buildSession({ ...base, date: new Date(2026, 9, d), groups: ["Legs"], duration: 60, equipment: ["Full gym"] })
+        .blocks[0]!.exercises.map((e) => e.name).join();
+    expect(warm(20)).not.toBe(warm(21));
   });
 });
 describe("prefill", () => {
