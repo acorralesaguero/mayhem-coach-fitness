@@ -226,7 +226,7 @@ export function buildSession(opts: {
   const met = leastRecent(metcons, opts.recentTitles ?? [], wk, (x) => x.name);
   const blocks: WorkoutPlan["blocks"] = [
     {
-      name: `Warm-up · ${warm.name}`,
+      name: "Warm-up",
       format: "2 rounds easy",
       minutes: warmMin,
       exercises: warm.ex.map(rx),
