@@ -3,10 +3,11 @@ import {
   PHASES,
   WAVE,
   METCONS,
-  WARMUP,
+  WARMUPS,
+  PUMP_SETS,
+  dayNumber,
   STRENGTH_OPTIONS,
   RECOVERY,
-  PUMP,
   TABATA_CORE,
   equipmentFor,
   type Ex,
@@ -216,10 +217,20 @@ export function buildSession(opts: {
     };
   }
 
+  const day = dayNumber(date);
+  const warmList = WARMUPS[focus];
+  const warm = warmList[((day % warmList.length) + warmList.length) % warmList.length] ?? warmList[0]!;
+  const pumpList = PUMP_SETS[focus];
+  const pump = pumpList[(((day >> 0) + wk) % pumpList.length + pumpList.length) % pumpList.length] ?? pumpList[0]!;
   const metcons = METCONS[focus];
   const met = leastRecent(metcons, opts.recentTitles ?? [], wk, (x) => x.name);
   const blocks: WorkoutPlan["blocks"] = [
-    { name: "Warm-up", format: "2 rounds easy", minutes: warmMin, exercises: WARMUP.map(rx) },
+    {
+      name: `Warm-up · ${warm.name}`,
+      format: "2 rounds easy",
+      minutes: warmMin,
+      exercises: warm.ex.map(rx),
+    },
   ];
 
   const metEx = met.ex.map((e) =>
@@ -281,7 +292,7 @@ export function buildSession(opts: {
       name: "Builder",
       format: "Supersets · 60 s rest",
       minutes: spare - finisher,
-      exercises: PUMP[focus].map((e) =>
+      exercises: pump.map((e) =>
         adaptExercise(
           {
             name: e.name,
