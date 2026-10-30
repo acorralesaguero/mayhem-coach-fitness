@@ -520,3 +520,104 @@ export const TABATA_CORE: Ex[] = [
 ];
 for (const list of [...Object.values(PUMP), TABATA_CORE])
   for (const m of list) m.requires = equipmentFor(m.name);
+
+// ---- Expanded variety: rotating warm-ups, more circuits and builder sets ----
+const w = (name: string, reps: string, cue: string): Ex => ({ name, reps, cue });
+type TrainFocus = Exclude<Focus, "recovery">;
+export const WARMUPS: Record<TrainFocus, { name: string; ex: Ex[] }[]> = {
+  lower: [
+    { name: "Hip opener", ex: [w("Easy bike", "3 min", "Build gradually"), w("Cossack squat", "6/side", "Sit deep, heel down"), w("Glute bridge", "12", "Squeeze at the top"), w("Air squats", "10 slow", "Pause at the bottom")] },
+    { name: "Squat prep", ex: [w("Jumping jacks", "40", "Light on your feet"), w("Spiderman lunge", "5/side", "Elbow to instep"), w("Goblet squat hold", "30 s", "Pry knees open"), w("Lateral lunges", "8/side", "Push hips back")] },
+    { name: "Posterior chain primer", ex: [w("Row", "300 m", "Smooth strokes"), w("Good mornings", "12", "Flat back"), w("Single-leg glute bridge", "8/side", "Hips level"), w("Squat jumps", "6", "Land soft")] },
+    { name: "Athletic legs", ex: [w("High knees", "30 s", "Drive the knees"), w("Butt kicks", "30 s", "Quick feet"), w("Reverse lunges", "6/side", "Knee kisses the floor"), w("World's greatest stretch", "4/side", "Breathe into it")] },
+  ],
+  upper: [
+    { name: "Shoulder prep", ex: [w("Row", "250 m", "Easy pace"), w("Arm circles", "15 each way", "Big and slow"), w("Scapular push-ups", "10", "Arms stay straight"), w("Inchworms", "5", "Walk hands out long")] },
+    { name: "Push-pull primer", ex: [w("Jumping jacks", "40", "Light on your feet"), w("Prone Y-T raise", "8 each", "Thumbs up"), w("Incline push-up", "10", "Body in one line"), w("Scapular pull-ups", "8", "Shoulders down and back")] },
+    { name: "Calisthenics prep", ex: [w("Bear crawl", "20 m", "Knees hover"), w("Wrist rocks", "10", "Ease into it"), w("Pike push-up", "6", "Head through the arms"), w("Hollow hold", "20 s", "Low back glued")] },
+    { name: "Thoracic reset", ex: [w("Easy bike", "3 min", "Conversational pace"), w("Thread the needle", "6/side", "Follow your hand"), w("Down-dog to cobra", "8", "Slow transitions"), w("Push-ups", "8", "Quality reps")] },
+  ],
+  engine: [
+    { name: "Run builder", ex: [w("Jog", "3 min", "Nose breathing"), w("A-skips", "20 m", "Tall posture"), w("Leg swings", "10/side", "Relaxed swing"), w("Strides", "3 x 15 s", "Build to 80%")] },
+    { name: "Engine ramp", ex: [w("Row", "2 min easy + 1 min moderate", "Build gradually"), w("Burpees", "5", "Smooth, not fast"), w("World's greatest stretch", "4/side", "Breathe into it")] },
+    { name: "Bootcamp primer", ex: [w("Jumping jacks", "50", "Light on your feet"), w("Mountain climbers", "20", "Hips level"), w("Air squats", "15", "Full depth"), w("Inchworms", "5", "Walk hands out long")] },
+    { name: "Rope rhythm", ex: [w("Single-unders", "2 min", "Stay on the balls of your feet"), w("Lateral hops", "20", "Quick contacts"), w("Spiderman lunge", "4/side", "Elbow to instep")] },
+  ],
+  oly: [
+    { name: "Barbell complex", ex: [w("Row", "300 m", "Smooth strokes"), w("Movement prep with empty bar", "2 rounds", "Rehearse today's patterns"), w("Overhead squat with PVC", "8", "Active shoulders"), w("Muscle snatch with empty bar", "5", "Elbows high and outside")] },
+    { name: "Lifter's mobility", ex: [w("Goblet squat hold", "45 s", "Pry knees open"), w("Front rack stretch", "30 s/side", "Elbows up"), w("Hang power clean with empty bar", "5", "Jump and shrug"), w("Broad jumps", "4", "Explode, land soft")] },
+    { name: "Triple extension", ex: [w("Easy bike", "3 min", "Build gradually"), w("Squat jumps", "6", "Land soft"), w("Good mornings", "10", "Flat back"), w("Push press with empty bar", "8", "Dip and drive")] },
+  ],
+  full: [
+    { name: "Classic prep", ex: [w("Easy row / bike", "3 min", "Build gradually"), w("World's greatest stretch", "5/side", "Breathe into it"), w("Movement prep with empty bar", "2 rounds", "Rehearse today's patterns")] },
+    { name: "Military PT", ex: [w("Jumping jacks", "40", "Count out loud"), w("Push-ups", "10", "Body in one line"), w("Air squats", "15", "Full depth"), w("Flutter kicks", "20", "Low back down")] },
+    { name: "Freestyle flow", ex: [w("Bear crawl", "20 m", "Knees hover"), w("Inchworms", "5", "Walk hands out long"), w("Reverse lunges", "6/side", "Stay tall"), w("Burpees", "5", "Smooth, not fast")] },
+    { name: "Dynamic total body", ex: [w("Jog", "2 min", "Easy pace"), w("Arm circles", "10 each way", "Big and slow"), w("Cossack squat", "5/side", "Sit deep"), w("Plank shoulder taps", "16", "Hips still")] },
+  ],
+};
+
+const extra: Record<TrainFocus, Metcon[]> = {
+  lower: [
+    { name: "Squat Tabata", format: "Tabata 8 rounds each", minutes: 8, ex: [ex("Air squats", "20 s on / 10 s off"), ex("Reverse lunges", "20 s on / 10 s off")] },
+    { name: "Hinge & Hop", format: "E2MOM 16", minutes: 16, ex: [ex("Kettlebell deadlift", "12"), ex("Box jumps", "8"), ex("Wall sit", "30 s")] },
+    { name: "Sandbag Patrol", format: "AMRAP 14", minutes: 14, ex: [ex("Goblet squat", "12"), ex("Walking lunges", "16"), ex("Broad jumps", "6"), ex("Run", "200 m")] },
+  ],
+  upper: [
+    { name: "Calisthenics Ladder", format: "EMOM 16", minutes: 16, ex: [ex("Pull-ups", "5"), ex("Push-ups", "12"), ex("Pike push-up", "8"), ex("Hollow hold", "30 s")] },
+    { name: "Upper Tabata", format: "Tabata 8 rounds each", minutes: 8, ex: [ex("Push-ups", "20 s on / 10 s off"), ex("Ring rows", "20 s on / 10 s off")] },
+    { name: "Bench & Bar", format: "4 rounds for quality", minutes: 16, ex: [ex("Dumbbell bench press", "10"), ex("Dumbbell row", "10/arm"), ex("Dips", "10"), ex("Plank shoulder taps", "20")] },
+  ],
+  engine: [
+    { name: "Bootcamp 400s", format: "5 rounds for time · cap 20", minutes: 20, ex: [ex("Run", "400 m"), ex("Burpees", "10"), ex("Flutter kicks", "20")] },
+    { name: "30/30 Engine", format: "EMOM 16 · 30 s on / 30 s off", minutes: 16, ex: [ex("Bike", "30 s hard"), ex("Mountain climbers", "30 s"), ex("Row", "30 s hard"), ex("Jumping jacks", "30 s")] },
+    { name: "Burpee Deck", format: "AMRAP 12", minutes: 12, ex: [ex("Burpees", "8"), ex("Squat jumps", "10"), ex("High knees", "30 s")] },
+  ],
+  oly: [
+    { name: "Hang Clean EMOM", format: "EMOM 10", minutes: 10, ex: [ex("Hang power clean", "3", "clean_jerk", 0.45), ex("Push press", "3", "push_press", 0.45)] },
+    { name: "Dumbbell Oly Sprint", format: "AMRAP 12", minutes: 12, ex: [ex("Dumbbell snatch", "10 alt"), ex("Dumbbell power clean", "8"), ex("Box step-ups", "10")] },
+    { name: "Overhead Engine", format: "3 x 3 min on / 1 min off", minutes: 12, ex: [ex("Overhead squat", "6", "snatch", 0.4), ex("Burpees", "6"), ex("Row", "150 m")] },
+  ],
+  full: [
+    { name: "Murph Lite", format: "For time · cap 25", minutes: 25, ex: [ex("Run", "800 m"), ex("Pull-ups", "50"), ex("Push-ups", "100"), ex("Air squats", "150"), ex("Run", "800 m")] },
+    { name: "Freestyle Pyramid", format: "For time · cap 15", minutes: 15, ex: [ex("Burpees", "5-10-15-10-5"), ex("Sit-ups", "10-20-30-20-10"), ex("Squat jumps", "5-10-15-10-5")] },
+    { name: "Total Body Tabata", format: "Tabata 4 movements", minutes: 16, ex: [ex("Kettlebell swings", "20 s on / 10 s off"), ex("Push-ups", "20 s on / 10 s off"), ex("Air squats", "20 s on / 10 s off"), ex("Sit-ups", "20 s on / 10 s off")] },
+  ],
+};
+for (const f of Object.keys(extra) as TrainFocus[]) METCONS[f].push(...extra[f]);
+
+const b = (name: string, reps: string, cue: string, rx?: [number, number]): Ex => (rx ? { name, reps, cue, rx } : { name, reps, cue });
+export const PUMP_SETS: Record<TrainFocus, Ex[][]> = {
+  lower: [
+    PUMP.lower,
+    [b("Bulgarian split squat", "3 x 10/leg", "Torso tall"), b("Dumbbell Romanian deadlift", "3 x 10", "Hinge, soft knees", [40, 25]), b("Wall sit", "3 x 40 s", "Thighs parallel"), b("Single-leg calf raise", "3 x 12/side", "Pause at top")],
+    [b("Leg press or goblet squat", "4 x 12", "Full depth, control"), b("Hamstring curl (machine or slider)", "3 x 12", "Slow lowering"), b("Hip thrust", "3 x 12", "Chin tucked, ribs down"), b("Lateral lunges", "3 x 8/side", "Push hips back")],
+  ],
+  upper: [
+    PUMP.upper,
+    [b("Dumbbell hammer curl", "3 x 12", "Neutral grip", [25, 15]), b("Bench dips", "3 x 12", "Elbows back"), b("Dumbbell lateral raise", "3 x 15", "Lead with elbows", [15, 10]), b("Diamond push-ups", "3 x 8", "Elbows tight")],
+    [b("Lat pulldown or band pulldown", "4 x 12", "Elbows to ribs"), b("Cable or band triceps pushdown", "3 x 15", "Elbows pinned"), b("Dumbbell incline press", "3 x 10", "Control down", [40, 25]), b("Face pulls (band)", "3 x 15", "Pull to forehead")],
+    [b("Archer push-ups", "3 x 5/side", "Shift slowly"), b("Chin-ups", "3 x 5–8", "Chest to bar"), b("Pike push-up", "3 x 8", "Head through the arms"), b("Superman hold", "3 x 30 s", "Squeeze glutes")],
+  ],
+  engine: [
+    PUMP.engine,
+    [b("Plank shoulder taps", "3 x 20", "Hips still"), b("Dumbbell biceps curl", "3 x 12", "Elbows pinned", [25, 15]), b("Bench dips", "3 x 12", "Elbows back")],
+  ],
+  oly: [
+    PUMP.oly,
+    [b("Dumbbell shrugs", "3 x 15", "Pause at the top", [50, 30]), b("Dumbbell reverse fly", "3 x 15", "Squeeze shoulder blades", [15, 10]), b("Back extension (superman)", "3 x 12", "Glutes on")],
+  ],
+  full: [
+    PUMP.full,
+    [b("Push-ups", "3 x 12", "Body in one line"), b("Chin-ups", "3 x 6–8", "Chest to bar"), b("Goblet squat", "3 x 12", "Slow down, drive up", [35, 26]), b("Dumbbell hammer curl", "3 x 12", "Neutral grip", [25, 15])],
+    [b("Dumbbell incline press", "3 x 10", "Control down", [40, 25]), b("Dumbbell row", "3 x 12/arm", "Pull to the hip", [40, 25]), b("Dumbbell lateral raise", "3 x 15", "Lead with elbows", [15, 10]), b("Cable or band triceps pushdown", "3 x 15", "Elbows pinned")],
+  ],
+};
+export function dayNumber(d: Date) {
+  return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+}
+for (const list of [
+  ...Object.values(WARMUPS).flat().map((x) => x.ex),
+  ...Object.values(extra).flat().map((m) => m.ex),
+  ...Object.values(PUMP_SETS).flat(),
+])
+  for (const m of list) m.requires = equipmentFor(m.name);
