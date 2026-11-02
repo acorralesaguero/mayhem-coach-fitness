@@ -17,7 +17,8 @@
 - [x] Shared data cache, accessibility, static-only PWA and install prompt
 - [x] Verify public routes, generated sample, signup safeguards, safe redirect, consent gate and focused rule tests
 - [ ] Verify signed-in onboarding, logging, coach adjustment, timer score and completion — blocked by user age/terms consent and exercise-clearance acknowledgement
-- [ ] Verify hosted email delivery/recovery and production PWA installation — requires user email confirmation and deployment
+- [ ] Verify hosted email delivery/recovery — requires user email confirmation
+- [x] iPhone home-screen install: iOS head tags, manifest scope and icons, install hint verified on the published address in EN/ES
 - [ ] Qualified legal and programming review — requires legal adviser and coach
 - [ ] Deferred: analytics and coach usage limits (user chose to postpone)
 - [x] Gender-neutral start screen and block-style Forge logo with matching app icon
