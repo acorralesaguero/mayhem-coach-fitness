@@ -16,10 +16,10 @@ export function InstallPrompt() {
   useEffect(() => {
     if (window.location.hostname !== new URL(SITE_URL).hostname || window.self !== window.top)
       return;
-    setIos(
-      /iPhone|iPad/.test(navigator.userAgent) &&
-        !window.matchMedia("(display-mode: standalone)").matches,
-    );
+    const ua = navigator.userAgent,
+      applePhone =
+        /iPhone|iPad/.test(ua) || (/Macintosh/.test(ua) && (navigator.maxTouchPoints ?? 0) > 1);
+    setIos(applePhone && !window.matchMedia("(display-mode: standalone)").matches);
     const listener = (e: Event) => {
       e.preventDefault();
       setEvent(e as InstallEvent);
@@ -27,7 +27,7 @@ export function InstallPrompt() {
     window.addEventListener("beforeinstallprompt", listener);
     return () => window.removeEventListener("beforeinstallprompt", listener);
   }, []);
-  if (hidden || (works?.filter((w) => w.completed).length ?? 0) < 2 || (!event && !ios))
+  if (hidden || (works?.filter((w) => w.completed).length ?? 0) < 1 || (!event && !ios))
     return null;
   return (
     <aside className="mx-auto max-w-xl border-b px-5 py-4">

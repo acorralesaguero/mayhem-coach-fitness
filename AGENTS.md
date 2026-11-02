@@ -29,3 +29,4 @@
 - Dynamic interface sentences use translateTemplate through useTranslation().tx, inserting translated labels or unchanged user values after translating the sentence — preserves grammar and prevents translation of names or training inputs.
 - Language switching is one compact EN/ES segmented control rendered in each screen's header row (start page beside the sign-in button, account screens in the layout header), never a full-width bar — keeps the switch reachable without displacing content.
 - Logging prefill is pure prefillActual in progress.ts (recent-log average, else prescription); Today quick start saves a workout without a check-in so insights only hold real answers.
+- Home-screen install metadata lives in public/manifest.webmanifest (scope "/" so every screen stays inside the installed app) and the iOS head tags in __root; the install hint and service worker activate only on the SITE_URL hostname — keeps previews free of stale caches.
