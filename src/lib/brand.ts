@@ -4,7 +4,7 @@ export const BRAND = {
   contactEmail: "",
 };
 export const TERMS_VERSION = "2026-10-17";
-export const SITE_URL = "https://mayhem-coach-fitness.lovable.app";
+export const SITE_URL = "https://forge-wellness.lovable.app";
 export function pageHead(title: string, description: string, path?: string) {
   const full = `${title} — ${BRAND.name}`;
   return {
